@@ -3,19 +3,20 @@
 ## 개요
 
 **현재 상태**: Next.js 15 모놀리스 기반 문서 (실제 코드 없음)
-**목표 상태**: 완전 분리된 Python 백엔드 + React SPA 프론트엔드 + 헥사고널 아키텍처
+**목표 상태**: 완전 분리된 Python 백엔드 + React SPA 프론트엔드 + Clean Architecture Lite
 **타임라인**: 8주 MVP 유지
 
 ### 핵심 결정 요약
 
 | 항목 | 최종 결정 | 이유 |
 |------|----------|------|
-| **백엔드** | Django + DRF | 빠른 개발 속도 (Admin, ORM, Allauth 내장) |
-| **프론트엔드** | Vite + React (SPA) | Next.js 완전 제거, 완전 분리 아키텍처 |
+| **백엔드** | Django 5.1 + DRF | 빠른 개발 속도 (Admin, ORM, Allauth 내장) |
+| **프론트엔드** | React 18.3 + Vite 5 (SPA) | 안정성 검증된 버전, 완전 분리 아키텍처 |
+| **아키텍처** | Clean Architecture Lite | MVP 속도 우선 (Service Layer + Domain) |
 | **ORM** | Django ORM | Django 생태계 통합, 마이그레이션 자동 생성 |
 | **인증** | Django-Allauth | Google OAuth 5분 설정 |
-| **스트리밍** | Django Channels | SSE 지원 (Claude 실시간 응답) |
-| **SEO** | vite-plugin-seo-prerender | Next.js 없이 해결 가능 |
+| **실시간** | Django Channels (SSE) | Claude 스트리밍 (단방향 충분) |
+| **비동기 작업** | Celery + Redis | 15분 시장 분석, 통합 메시지 브로커 |
 
 ---
 
@@ -26,7 +27,7 @@
 **선택 근거 (8주 MVP에 최적)**:
 - ✅ **빠른 개발 속도**: Admin 패널, 인증, ORM이 기본 제공 → 초기 개발 2배 빠름
 - ✅ **Django Admin**: 사용자, 메시지, 포트폴리오 관리 UI 즉시 제공 (디버깅/관리 용이)
-- ✅ **Django ORM**: 성숙한 ORM, 마이그레이션 도구, 헥사고널 아키텍처 Repository 패턴 적용 가능
+- ✅ **Django ORM**: 성숙한 ORM, 마이그레이션 도구, Clean Architecture Repository 패턴 적용 가능
 - ✅ **Django REST Framework**: API 직렬화, 인증, 권한, OpenAPI 문서 생성 (drf-spectacular)
 - ✅ **Django-Allauth**: Google OAuth 5분 설정
 - ✅ **배터리 포함**: 8주 타임라인에 프레임워크 조합 시간 낭비 없음
@@ -51,7 +52,7 @@
 - ✅ **Django 통합**: 프레임워크 네이티브, 마이그레이션 자동 생성 (`python manage.py makemigrations`)
 - ✅ **성숙도**: 16년 역사, 프로덕션 검증 완료, 광범위한 문서
 - ✅ **Admin 자동 연동**: 모델 정의만 하면 Admin UI 즉시 생성
-- ✅ **헥사고널 아키텍처 적용 가능**: Repository 패턴으로 ORM 추상화 가능
+- ✅ **Clean Architecture 적용 가능**: Repository 패턴으로 ORM 추상화 가능
 - ✅ **QuerySet API**: 직관적이고 강력한 쿼리 빌더 (`.filter()`, `.select_related()`, `.prefetch_related()`)
 
 **Django ORM으로 Repository 패턴 구현**:
@@ -84,7 +85,7 @@ class DjangoUserRepository(UserRepository):
 - **DRF Token/Session Auth**: REST API 인증 (쿠키 세션 or Token)
 - **커스터마이징 용이**: AllAuth 시그널로 사용자 프로필 자동 생성
 
-### 1.4 프론트엔드: **Vite 6 + React 19 + TanStack Query** (Next.js 제거) ✅
+### 1.4 프론트엔드: **React 18.3 + Vite 5 + TanStack Query** (Next.js 제거) ✅
 
 **Next.js 완전 제거 이유**:
 - ❌ SSR 불필요: 메인 앱은 인증 후 사용 (SEO 무관)
@@ -93,14 +94,14 @@ class DjangoUserRepository(UserRepository):
 - ✅ 배포 단순성: S3 + CloudFront 정적 호스팅 (Next.js Vercel 종속 없음)
 
 **프론트엔드 스택**:
-- **빌드 도구**: Vite 6 (CRA 대비 10배 빠름)
-- **프레임워크**: React 19 (최신 안정 버전, 2024년 12월)
+- **빌드 도구**: Vite 5 (안정성 검증, 플러그인 생태계 완성)
+- **프레임워크**: React 18.3 (1년+ 프로덕션 검증)
 - **상태 관리**:
   - 서버 상태 → **TanStack Query** (캐싱, 자동 리페칭, 낙관적 업데이트)
   - UI 상태 → **Zustand** (경량 3KB, Redux 대비 90% 코드 감소)
 - **API 클라이언트**: `drf-spectacular` + `openapi-typescript-codegen` (Django REST Framework OpenAPI 스펙에서 자동 생성)
-- **스타일링**: Tailwind CSS 4 (현재 계획 유지)
-- **컴포넌트**: shadcn/ui (현재 계획 유지)
+- **스타일링**: Tailwind CSS 4
+- **컴포넌트**: shadcn/ui
 
 **SEO 전략** (Next.js 없이 해결):
 1. **랜딩 페이지** (WhyBitcoinFallen.com, Sage.ai 랜딩):
@@ -113,16 +114,20 @@ class DjangoUserRepository(UserRepository):
 
 ---
 
-## 2. 헥사고널 아키텍처 구조
+## 2. Clean Architecture Lite 구조
 
 ### 2.1 레이어 의존성
 
 ```
-Presentation → Application → Domain ← Infrastructure
- (Django DRF)  (Use Cases)  (Entities)  (Adapters)
+Presentation → Services → Domain ← Infrastructure
+ (DRF Views)  (Business)  (Entities)  (Adapters)
 ```
 
-### 2.2 백엔드 폴더 구조 (Django + 헥사고널)
+**Hexagonal vs Clean Lite 차이**:
+- Hexagonal: Ports(인터페이스) + Adapters(구현) 명확히 분리 → MVP에는 과도
+- Clean Lite: Service Layer에서 비즈니스 로직 처리, 필요시 Repository 패턴만 사용
+
+### 2.2 백엔드 폴더 구조 (Django + Clean Lite)
 
 ```
 /apps/backend/
@@ -136,27 +141,20 @@ Presentation → Application → Domain ← Infrastructure
 │   ├── asgi.py                     # ASGI 진입점 (Channels)
 │   └── wsgi.py                     # WSGI 진입점
 │
-├── domain/                         # 핵심 비즈니스 로직 (Pure Python)
-│   ├── entities/                   # 도메인 모델 (dataclass)
+├── domain/                         # 도메인 엔티티 (Pure Python, dataclass)
+│   ├── entities/                   # 비즈니스 객체
 │   │   ├── user.py
 │   │   ├── chat.py
 │   │   ├── message.py
 │   │   └── portfolio.py
-│   ├── value_objects/              # 불변 값 객체
-│   │   ├── email.py
-│   │   ├── tier.py
-│   │   └── signal.py
-│   └── ports/                      # 인터페이스 (ABC)
-│       ├── repositories.py         # 데이터베이스 포트
-│       ├── ai_service.py           # AI 포트
-│       ├── market_data.py          # 외부 API 포트
-│       └── notification.py         # 알림 포트
+│   └── value_objects/              # 불변 값 객체
+│       ├── tier.py
+│       └── signal.py
 │
-├── application/                    # 유즈케이스 (비즈니스 규칙)
-│   ├── services/
-│   │   ├── chat_service.py             # 채팅 플로우 오케스트레이션
-│   │   ├── portfolio_service.py        # 섀도우 포트폴리오 로직
-│   │   └── alert_service.py            # 알림 로직
+├── services/                       # 비즈니스 로직 (Service Layer)
+│   ├── chat_service.py             # 채팅 플로우 오케스트레이션
+│   ├── portfolio_service.py        # 섀도우 포트폴리오 로직
+│   ├── alert_service.py            # 알림 로직
 │   └── dto/                        # 데이터 전송 객체
 │       ├── chat_request.py
 │       └── chat_response.py
@@ -221,73 +219,71 @@ Presentation → Application → Domain ← Infrastructure
 └── Dockerfile                      # 프로덕션 컨테이너
 ```
 
-### 2.3 헥사고널 아키텍처 예시: Chat Service
+### 2.3 Clean Architecture Lite 예시: Chat Service
 
 ```python
-# 1. Port (인터페이스) - domain/ports/ai_service.py
-class AIService(ABC):
-    @abstractmethod
-    async def generate_response(
-        self, messages: list[Message], context: UserContext
-    ) -> ChatResponse:
-        pass
+# 1. Domain Entity - domain/entities/message.py
+@dataclass
+class Message:
+    id: UUID
+    chat_id: UUID
+    role: str  # 'user' | 'assistant'
+    content: str
+    created_at: datetime
 
-# 2. Adapter (구현) - infrastructure/ai/anthropic_adapter.py
-class AnthropicAIService(AIService):
-    async def generate_response(
-        self, messages: list[Message], context: UserContext
-    ) -> ChatResponse:
-        # Claude API 호출 + Multi-agent 오케스트레이션
-        intent = await self.manager.analyze_intent(messages[-1])
-        facts = await self.analyst.gather_facts(intent)
-        draft = await self.persona.generate_response(facts, context)
-        final = await self.risk.validate(draft)
-        return ChatResponse(message=final, ...)
-
-# 3. Use Case (비즈니스 로직) - application/services/chat_service.py
+# 2. Service Layer - services/chat_service.py
 class ChatService:
     def __init__(
         self,
-        ai_service: AIService,  # 주입된 포트
-        user_repo: UserRepository,
-        message_repo: MessageRepository
+        anthropic_client,  # 직접 주입 (MVP는 단순하게)
+        message_repo,
+        user_repo
     ):
-        self.ai_service = ai_service
-        ...
+        self.anthropic = anthropic_client
+        self.message_repo = message_repo
+        self.user_repo = user_repo
 
     async def send_message(
         self, user_id: UUID, chat_id: UUID, content: str
     ) -> ChatResponse:
-        user = await self.user_repo.find_by_id(user_id)
-        context = await self._build_context(chat_id, user)
-        response = await self.ai_service.generate_response(
-            messages=context.messages,
-            context=context
+        # 비즈니스 로직
+        user = await self.user_repo.get(user_id)
+        messages = await self.message_repo.get_recent(chat_id, limit=20)
+
+        # AI 호출 (Multi-agent)
+        response = await self._generate_ai_response(messages, user)
+
+        # 저장
+        await self.message_repo.create(
+            Message(role='assistant', content=response, ...)
         )
-        await self.message_repo.save(response.message)
         return response
 
-# 4. Controller (API) - apps/chats/views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+# 3. Repository (선택적) - apps/chats/repositories.py
+class MessageRepository:
+    async def get_recent(self, chat_id: UUID, limit: int) -> list[Message]:
+        qs = ChatMessage.objects.filter(chat_id=chat_id).order_by('-created_at')[:limit]
+        return [self._to_entity(m) for m in qs]
 
+    def _to_entity(self, model: ChatMessage) -> Message:
+        return Message(id=model.id, content=model.content, ...)
+
+# 4. DRF View - apps/chats/views.py
 class ChatViewSet(APIView):
     permission_classes = [IsAuthenticated]
-
-    def __init__(self):
-        # 의존성 주입 (Django에서는 __init__에서)
-        self.chat_service = ChatService(
-            ai_service=AnthropicAIService(),
-            user_repo=DjangoUserRepository(),
-            message_repo=DjangoMessageRepository()
-        )
 
     def post(self, request):
         serializer = ChatRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        response = self.chat_service.send_message(
+        # Service Layer 호출
+        service = ChatService(
+            anthropic_client=get_anthropic_client(),
+            message_repo=MessageRepository(),
+            user_repo=UserRepository()
+        )
+
+        response = await service.send_message(
             user_id=request.user.id,
             chat_id=serializer.validated_data['chat_id'],
             content=serializer.validated_data['message']
@@ -295,10 +291,11 @@ class ChatViewSet(APIView):
         return Response(ChatResponseSerializer(response).data)
 ```
 
-**장점**:
-- 테스트 용이: `AIService` 인터페이스를 Mock으로 대체
-- 유연성: Claude → OpenAI 교체 시 비즈니스 로직 변경 없음
-- 유지보수: 명확한 책임 분리
+**Clean Lite 장점**:
+- Hexagonal보다 단순 (Ports/Adapters 레이어 제거)
+- MVP 속도 우선 (8주 타임라인)
+- 필요시 Repository 패턴만 추가
+- 테스트 가능 (Service Layer 독립적)
 
 ---
 

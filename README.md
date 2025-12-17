@@ -67,13 +67,13 @@
 
 | 컴포넌트 | 기술 스택 |
 |----------|-----------|
-| **백엔드** | Django 5.1+ + Django REST Framework |
-| **프론트엔드** | Vite 6 + React 19 + TypeScript (완전 분리 SPA) |
-| **아키텍처** | Hexagonal (Ports & Adapters) + 완전 백엔드/프론트엔드 분리 |
+| **백엔드** | Django 5.1 + Django REST Framework |
+| **프론트엔드** | React 18.3 + Vite 5 + TypeScript (완전 분리 SPA) |
+| **아키텍처** | Clean Architecture Lite (Service Layer + Domain) |
 | **ORM** | Django ORM (PostgreSQL) |
 | **인증** | Django-Allauth (Google OAuth) |
 | **AI** | Claude 3.5 Sonnet + Haiku (Anthropic Python SDK) |
-| **스트리밍** | Django Channels (SSE) |
+| **실시간** | Django Channels (SSE) |
 | **Database** | PostgreSQL (RDS) + Redis (ElastiCache) |
 | **감사 로그** | 별도 audit_log 테이블 (모든 중요 작업 추적) |
 | **Infrastructure** | ECS Fargate + S3/CloudFront |
@@ -266,7 +266,7 @@
 
 _"자네, 시장이 공포에 질렸을 때가 바로 기회일세."_ - 월렛 버핏
 
-**Built with**: Django 5.1+ + DRF, Vite 6 + React 19, Tailwind CSS 4, Claude 3.5 Sonnet & Haiku
-**Architecture**: Hexagonal (Ports & Adapters), Complete Backend/Frontend Separation
+**Built with**: Django 5.1 + DRF, React 18.3 + Vite 5, Tailwind CSS 4, Claude 3.5 Sonnet & Haiku
+**Architecture**: Clean Architecture Lite, Complete Backend/Frontend Separation
 **Target**: 8주 MVP 완성, 2026년 MAU 10K+
-**Version**: 3.0 (2025년 12월 17일) - Django Migration
+**Version**: 3.1 (2025년 12월 17일) - Clean Lite + Stable Versions
