@@ -5,7 +5,7 @@
 > **"모든 개인 투자자에게 월가 수준의 AI 멘토를"**
 
 [![MVP Development](https://img.shields.io/badge/status-8%EC%A3%BC%20MVP%20%EA%B0%9C%EB%B0%9C-orange)](https://github.com/sage-ai/sage-platform)
-[![Version](https://img.shields.io/badge/version-3.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.1-blue)]()
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
 ---
@@ -33,14 +33,26 @@
 
 ---
 
-## 빠른 시작
+## 📚 문서 네비게이션
 
-### 주요 문서
+> **모든 프로젝트 문서는 이 저장소에서 관리됩니다** (단일 진실 공급원)
+
+### 빠른 시작
 
 | 문서 | 설명 | 대상 |
 |------|------|------|
+| **[WIKI_HOME.md](WIKI_HOME.md)** | 전체 문서 인덱스 | 모든 팀원 |
+| **[CLAUDE.md](CLAUDE.md)** | AI 개발 가이드 (Claude Code) | 개발자 |
 | **[01-SAGE-overview-kr.md](01-SAGE-overview-kr.md)** | 사업 기획서 (v2.2) | 경영진, 투자자 |
 | **[06-MVP-Spec-ko.md](06-MVP-Spec-ko.md)** | MVP 개발 스펙 (8주) | 개발팀 |
+
+### 문서 디렉토리
+
+- **[docs/business/](docs/business/)** - 사업 계획, 시장 분석, GTM 전략, 브랜딩
+- **[docs/technical/](docs/technical/)** - 백엔드/프론트엔드/인프라 명세서, DB 스키마, API 문서
+- **[docs/product/](docs/product/)** - 제품 명세서, 사용자 여정, 페르소나, UX 가이드
+- **[docs/operations/](docs/operations/)** - 운영 로드맵, 커뮤니티 관리, 라이브 운영
+- **[docs/ai-guides/](docs/ai-guides/)** - AI 기반 개발 가이드 (Backend/Frontend/Infrastructure)
 
 ### 서비스 구성 (MVP)
 
