@@ -43,16 +43,15 @@
 |------|------|------|
 | **[WIKI_HOME.md](WIKI_HOME.md)** | 전체 문서 인덱스 | 모든 팀원 |
 | **[CLAUDE.md](CLAUDE.md)** | AI 개발 가이드 (Claude Code) | 개발자 |
+| **[AI Team Strategy](docs/business/ai_team_strategy.md)** | AI-First 개발 전략 (Claude Code + GitHub Copilot) | 개발팀, 경영진 |
 | **[MVP_technical_paper.md](MVP_technical_paper.md)** | MVP 기술 스택 명세 | 개발팀 |
 | **[Business Plan](docs/business/business_plan.md)** | 비즈니스 플랜 | 경영진, 투자자 |
 | **[MVP Definition](docs/business/mvp_definition.md)** | MVP 정의 및 범위 | 전체 팀 |
-| **[Branding Guide](docs/business/branding_guide.md)** | 브랜드 가이드라인 | 마케팅, 디자인 |
 
 ### 문서 디렉토리
 
-- **[docs/business/](docs/business/)** - 사업 계획, 시장 분석, GTM 전략, 브랜딩
+- **[docs/business/](docs/business/)** - 사업 계획, 시장 분석, GTM 전략, AI 팀 전략
 - **[docs/technical/](docs/technical/)** - 백엔드/프론트엔드/인프라 명세서, DB 스키마, API 문서
-- **[docs/product/](docs/product/)** - 제품 명세서, 사용자 여정, 페르소나, UX 가이드
 - **[docs/operations/](docs/operations/)** - 운영 로드맵, 커뮤니티 관리, 라이브 운영
 - **[docs/ai-guides/](docs/ai-guides/)** - AI 기반 개발 가이드 (Backend/Frontend/Infrastructure)
 
@@ -170,7 +169,7 @@
 
 ### AI-Native 개발
 
-- Claude Code + Cursor 활용으로 10배 빠른 개발
+- Claude Code 활용으로 10배 빠른 개발
 - 멀티 에이전트 오케스트레이션으로 환각 제로화
 - Tool 강제 사용으로 수치 오류 원천 차단
 

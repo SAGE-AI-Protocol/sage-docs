@@ -11,18 +11,17 @@ This repository (`sage-docs`) contains all technical specifications, business do
 **Key Differentiators**:
 - **Wallet Buffett AI Mentor**: Claude Sonnet 4-based multi-agent system
 - **Shadow Portfolio**: Transparent performance tracking (Target: ROI +18.5%, Hit Rate 72.3%)
-- **Proactive Alerts**: Market monitoring with PWA Push + Discord notifications
+- **Proactive Analysis**: 15-min automatic market analysis with PWA Push + Discord notifications
 - **Conversational Onboarding**: No surveys - profile inferred from natural conversation
 
 ## Repository Structure
 
 This is a **documentation-only repository** with markdown files organized by purpose:
 
-- `docs/business/` - Business plan, MVP definition, branding guide, market analysis
+- `docs/business/` - Business plan, MVP definition, AI team strategy, market analysis
 - `docs/technical/` - System architecture for backend (Nest.js), frontend (React), infrastructure (AWS)
-- `docs/product/` - Product specifications, user journey, persona design, UX guidelines
 - `docs/operations/` - GTM strategy, viral campaign, community management, live operations
-- `docs/ai-guides/` - AI-native development patterns for Claude Code/Cursor
+- `docs/ai-guides/` - AI-native development patterns for Claude Code
 
 ## Key Architecture Decisions
 

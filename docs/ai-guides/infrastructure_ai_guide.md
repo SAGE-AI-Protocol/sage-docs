@@ -11,8 +11,8 @@
 
 ### Tools
 
-- **Claude Code**: Terraform, GitHub Actions, Shell scripts
-- **Cursor**: IaC (Infrastructure as Code), 빠른 스크립트 생성
+- **Claude Code**: Terraform, GitHub Actions, Shell scripts, IaC
+- **GitHub Copilot**: 코드 리뷰, 실시간 제안
 
 ---
 

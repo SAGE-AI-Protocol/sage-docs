@@ -157,7 +157,7 @@ Transparent. Verifiable. Trustworthy.
 
 ---
 
-🔔 Proactive Alerts
+🔔 Proactive Analysis
 
 Markets move fast. We've got you covered.
 
@@ -195,7 +195,7 @@ Premium ($49.99/mo):
 
 🧪 Built by a team of 5
 
-- AI-native development (Claude Code + Cursor)
+- AI-native development (Claude Code)
 - 3 months from idea to launch
 - Tech stack: Nest.js + React + Claude 4
 

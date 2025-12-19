@@ -11,9 +11,8 @@
 
 ### Tools
 
-- **Claude Code**: 복잡한 로직, 아키텍처 설계
-- **Cursor**: 빠른 CRUD, 보일러플레이트
-- **GitHub Copilot**: 실시간 코드 제안
+- **Claude Code**: 복잡한 로직, 아키텍처 설계, CRUD 생성
+- **GitHub Copilot**: 코드 리뷰, 실시간 코드 제안
 
 ---
 

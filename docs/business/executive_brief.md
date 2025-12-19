@@ -145,7 +145,7 @@
 ### AI-Native Development
 
 **10배 빠른 개발 속도**
-- Claude Code + Cursor 활용
+- Claude Code 활용
 - AI-First 설계
 - TypeScript Fullstack (Nest.js + React)
 

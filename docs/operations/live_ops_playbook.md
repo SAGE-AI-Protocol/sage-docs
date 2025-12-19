@@ -85,7 +85,7 @@
 - Fear & Greed 변화
 - 주요 뉴스 체크
 
-#### 2. Proactive Alerts
+#### 2. Proactive Analysis 알림
 
 - 급변 시 Discord 알림
 - Twitter 긴급 분석 포스트

@@ -11,9 +11,9 @@
 
 ### Tools
 
-- **v0.dev**: UI 컴포넌트 생성
-- **Cursor**: React 컴포넌트, Hooks
-- **Claude Code**: 복잡한 상태 관리, 아키텍처
+- **Claude Code**: React 컴포넌트, Hooks, 상태 관리, 아키텍처
+- **Figma + MCP**: UI/UX 디자인 (사용자가 직접 디자인)
+- **GitHub Copilot**: 실시간 코드 제안
 
 ---
 
@@ -389,32 +389,6 @@ export function CreateTradeForm() {
   );
 }
 ```
-
----
-
-## v0.dev Workflow
-
-### 1. Generate Initial Component
-
-**Prompt in v0.dev**:
-```
-Create a crypto portfolio dashboard with:
-- Header with total value and P&L
-- 3 stat cards (Total Value, Today's P&L, Win Rate)
-- Performance chart
-- List of trades (coin, buy/sell, price, P&L)
-- Use shadcn/ui components
-- Tailwind CSS
-- Mobile responsive
-```
-
-### 2. Refine & Customize
-
-**Copy generated code** → Paste into project → Refine:
-- Replace mock data with real API calls (TanStack Query)
-- Add TypeScript types
-- Integrate with Zustand/TanStack Query
-- Add error handling
 
 ---
 
