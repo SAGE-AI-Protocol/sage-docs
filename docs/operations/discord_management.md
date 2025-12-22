@@ -420,25 +420,292 @@ New Member Journey
 
 ## 8. Integration with Sage.ai
 
-### 8.1 Account Linking
+### 8.1 Account Linking Overview
 
 ```
-Discord <-> Sage.ai Linking
+Google 계정 ≠ Discord 계정 (별개 계정 연동)
 │
-├── User Flow
-│   ├── 1. User types /link in Discord
-│   ├── 2. Bot sends OAuth link via DM
-│   ├── 3. User logs into Sage.ai
-│   ├── 4. Authorization confirmed
-│   └── 5. Bot assigns "Verified" role
+├── Sage.ai 계정 (Google OAuth로 가입)
+│   └── sam@gmail.com
 │
-└── Benefits
-    ├── Personalized alerts based on portfolio
-    ├── Portfolio summary in Discord
-    └── Seamless app <-> community experience
+├── Discord 계정 (별도)
+│   └── sam#1234 (discord_id: 123456789)
+│
+└── 연동 후 DB
+    └── users: {
+          id: "user-123",
+          email: "sam@gmail.com",      // Google에서
+          discord_id: "123456789"       // Discord에서
+        }
 ```
 
-### 8.2 Deep Link Integration
+### 8.2 Account Linking Flow
+
+```
+회원가입 -> Discord 연동 플로우
+│
+├── 1. 유저가 Sage.ai 회원가입 (Google OAuth)
+│
+├── 2. 앱 내 설정 페이지에서 "Discord 연동" 버튼 클릭
+│   └── Discord OAuth2 로그인 팝업
+│
+├── 3. 유저가 자신의 Discord 계정으로 로그인 & 승인
+│   └── "Sage.ai가 Discord 계정에 접근하려 합니다"
+│
+├── 4. Discord Access Token 획득
+│   └── 유저의 Discord ID, Username 저장
+│
+├── 5. Bot API로 역할 부여
+│   └── PUT /guilds/{guild_id}/members/{user_id}/roles/{role_id}
+│
+└── 6. 완료 - 유저가 "Verified" 역할 획득
+```
+
+### 8.3 Discord Developer Portal Setup
+
+```
+Discord Application 설정
+│
+├── 1. Application 생성
+│   └── https://discord.com/developers/applications
+│   └── 이름: "Sage.ai"
+│
+├── 2. OAuth2 설정
+│   ├── Redirects: https://app.sage-ai.com/api/auth/discord/callback
+│   └── Scopes: identify, guilds.join
+│
+├── 3. Bot 생성
+│   ├── Bot 탭 → "Add Bot"
+│   ├── Token 복사 → 환경변수 저장
+│   └── Privileged Gateway Intents: Server Members Intent 활성화
+│
+└── 4. Bot 서버 초대
+    ├── OAuth2 → URL Generator
+    ├── Scopes: bot
+    ├── Permissions: Manage Roles
+    └── 생성된 URL로 서버에 봇 초대
+```
+
+### 8.4 Database Schema
+
+```typescript
+// users 테이블에 Discord 필드 추가
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey(),
+
+  // Google OAuth
+  email: varchar('email', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }),
+
+  // Discord 연동 (optional)
+  discordId: varchar('discord_id', { length: 50 }),
+  discordUsername: varchar('discord_username', { length: 100 }),
+  discordLinkedAt: timestamp('discord_linked_at'),
+
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+```
+
+### 8.5 Backend Implementation
+
+```typescript
+// Discord OAuth callback 처리
+// POST /api/auth/discord/callback
+
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const GUILD_ID = 'YOUR_SERVER_ID';        // Discord 서버 ID
+const VERIFIED_ROLE_ID = 'YOUR_ROLE_ID';  // Verified 역할 ID
+
+async function handleDiscordCallback(code: string, userId: string) {
+  // 1. Access Token 획득
+  const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID,
+      client_secret: process.env.DISCORD_CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: 'https://app.sage-ai.com/api/auth/discord/callback',
+    }),
+  });
+
+  const { access_token } = await tokenResponse.json();
+
+  // 2. Discord 유저 정보 획득
+  const userResponse = await fetch('https://discord.com/api/users/@me', {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+
+  const discordUser = await userResponse.json();
+
+  // 3. DB에 Discord ID 저장
+  await db.update(users)
+    .set({
+      discordId: discordUser.id,
+      discordUsername: `${discordUser.username}#${discordUser.discriminator}`,
+      discordLinkedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+
+  // 4. Bot API로 역할 부여
+  await assignVerifiedRole(discordUser.id);
+
+  return { success: true, discordUsername: discordUser.username };
+}
+
+// Bot API로 역할 부여
+async function assignVerifiedRole(discordUserId: string) {
+  const response = await fetch(
+    `https://discord.com/api/guilds/${GUILD_ID}/members/${discordUserId}/roles/${VERIFIED_ROLE_ID}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to assign Discord role');
+  }
+}
+
+// 연동 해제
+async function unlinkDiscord(userId: string) {
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (user?.discordId) {
+    // 역할 제거
+    await fetch(
+      `https://discord.com/api/guilds/${GUILD_ID}/members/${user.discordId}/roles/${VERIFIED_ROLE_ID}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+      }
+    );
+
+    // DB에서 Discord 정보 제거
+    await db.update(users)
+      .set({
+        discordId: null,
+        discordUsername: null,
+        discordLinkedAt: null,
+      })
+      .where(eq(users.id, userId));
+  }
+}
+```
+
+### 8.6 Frontend Implementation
+
+```typescript
+// components/DiscordLinkButton.tsx
+
+export function DiscordLinkButton() {
+  const { user } = useAuth();
+
+  const handleLink = () => {
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID!,
+      redirect_uri: 'https://app.sage-ai.com/api/auth/discord/callback',
+      response_type: 'code',
+      scope: 'identify guilds.join',
+      state: user.id,  // CSRF 방지용
+    });
+
+    window.location.href = `https://discord.com/api/oauth2/authorize?${params}`;
+  };
+
+  const handleUnlink = async () => {
+    await fetch('/api/auth/discord/unlink', { method: 'POST' });
+    // Refresh user data
+  };
+
+  if (user.discordId) {
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-green-500">Discord 연결됨</span>
+          <span className="ml-2 text-gray-500">{user.discordUsername}</span>
+        </div>
+        <button onClick={handleUnlink}>연동 해제</button>
+      </div>
+    );
+  }
+
+  return (
+    <button onClick={handleLink}>
+      Discord 연동하기
+    </button>
+  );
+}
+```
+
+### 8.7 Settings Page UI
+
+```
+설정 페이지 - 계정 연동
+┌─────────────────────────────────────────┐
+│  계정 연동                               │
+├─────────────────────────────────────────┤
+│                                         │
+│  Google    sam@gmail.com       연결됨    │
+│                                         │
+│  Discord   연결 안됨          [연동하기]  │
+│                                         │
+│  ─────────────────────────────────────  │
+│  Discord 연동 시 커뮤니티에서            │
+│  Verified 역할을 받을 수 있습니다         │
+│                                         │
+└─────────────────────────────────────────┘
+
+연동 후:
+┌─────────────────────────────────────────┐
+│  Discord   sam#1234           연결됨    │
+│                              [연동해제]  │
+└─────────────────────────────────────────┘
+```
+
+### 8.8 Discord Server Permission Setup
+
+```
+채널 권한 설정
+│
+├── @everyone
+│   ├── #welcome, #rules, #announcements: 읽기만
+│   └── 다른 채널: 접근 불가
+│
+├── Member (서버 가입 시 자동)
+│   ├── #welcome, #rules: 읽기만
+│   └── 다른 채널: 읽기만 (쓰기 불가)
+│
+└── Verified (Sage.ai 연동 시 API로 부여)
+    ├── 모든 채널: 읽기/쓰기 가능
+    └── #beta-testers 제외
+```
+
+### 8.9 Environment Variables
+
+```bash
+# Discord OAuth
+DISCORD_CLIENT_ID="your_client_id"
+DISCORD_CLIENT_SECRET="your_client_secret"
+
+# Discord Bot
+DISCORD_BOT_TOKEN="your_bot_token"
+DISCORD_GUILD_ID="your_server_id"
+DISCORD_VERIFIED_ROLE_ID="your_role_id"
+
+# Frontend
+NEXT_PUBLIC_DISCORD_CLIENT_ID="your_client_id"
+```
+
+### 8.10 Deep Link Integration
 
 ```typescript
 // Discord alert -> Sage.ai chat
