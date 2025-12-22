@@ -41,12 +41,12 @@
 
 | 문서 | 설명 | 대상 |
 |------|------|------|
-| **[WIKI_HOME.md](WIKI_HOME.md)** | 전체 문서 인덱스 | 모든 팀원 |
+| **[Wiki Home](wiki/home.md)** | 전체 문서 인덱스 | 모든 팀원 |
 | **[CLAUDE.md](CLAUDE.md)** | AI 개발 가이드 (Claude Code) | 개발자 |
-| **[AI Team Strategy](docs/business/ai_team_strategy.md)** | AI-First 개발 전략 (Claude Code + GitHub Copilot) | 개발팀, 경영진 |
+| **[AI Team Strategy](docs/business/ai-team-strategy.md)** | AI-First 개발 전략 (Claude Code + GitHub Copilot) | 개발팀, 경영진 |
 | **[MVP_technical_paper.md](MVP_technical_paper.md)** | MVP 기술 스택 명세 | 개발팀 |
-| **[Business Plan](docs/business/business_plan.md)** | 비즈니스 플랜 | 경영진, 투자자 |
-| **[MVP Definition](docs/business/mvp_definition.md)** | MVP 정의 및 범위 | 전체 팀 |
+| **[Business Plan](docs/business/business-plan.md)** | 비즈니스 플랜 | 경영진, 투자자 |
+| **[MVP Definition](docs/business/mvp-definition.md)** | MVP 정의 및 범위 | 전체 팀 |
 
 ### 문서 디렉토리
 
@@ -223,7 +223,7 @@
 ### 개발팀을 위해
 
 1. **[MVP_technical_paper.md](MVP_technical_paper.md)** - 기술 스택 명세
-2. **[06-MVP-Spec-ko.md](06-MVP-Spec-ko.md)** - MVP 개발 스펙
+2. **[MVP Spec (KR)](docs/technical/mvp-spec-kr.md)** - MVP 개발 스펙
 3. 현재 월 계획 확인
 4. 기술 스택 및 폴더 구조 숙지
 

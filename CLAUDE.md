@@ -153,9 +153,9 @@ When working on this documentation:
 Key document dependencies to understand when editing:
 
 - `MVP_technical_paper.md` → Core technology stack reference
-- `docs/business/mvp_definition.md` → Defines MVP scope (3-month timeline)
-- `docs/business/business_plan.md` → Business model and GTM strategy
-- `docs/business/branding_guide.md` → Brand identity and messaging
+- `docs/business/mvp-definition.md` → Defines MVP scope (3-month timeline)
+- `docs/business/business-plan.md` → Business model and GTM strategy
+- `docs/business/branding-guide.md` → Brand identity and messaging
 - `docs/technical/backend-spec.md` → Nest.js architecture reference
 - `docs/product/product-spec.md` → Defines 3 core features (Chat, Portfolio, Alerts)
 - `docs/ai-guides/backend-ai-guide.md` → Claude Code prompts for implementation

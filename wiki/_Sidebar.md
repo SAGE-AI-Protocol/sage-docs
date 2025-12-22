@@ -1,34 +1,37 @@
 ## Navigation
 
 **Getting Started**
-- [Home](Home)
-- [Project Overview (KR)](Project-Overview-KR)
-- [Architecture Overview](Architecture-Overview)
-- [MVP Definition](MVP-Definition)
-- [MVP Timeline](MVP-Timeline)
-- [MVP Spec (KR)](MVP-Spec-KR)
+- [Home](home)
+- [Project Overview (KR)](project-overview-kr)
+- [Architecture Overview](architecture-overview)
+- [MVP Definition](mvp-definition)
+- [MVP Timeline](mvp-timeline)
+- [MVP Spec (KR)](mvp-spec-kr)
+
+**Product**
+- [Product Specification](product-spec)
 
 **Technical**
-- [Backend Spec](Backend-Specification)
-- [Frontend Spec](Frontend-Specification)
-- [Infrastructure](Infrastructure-Design)
-- [API Docs](API-Documentation)
+- [Backend Spec](backend-spec)
+- [Frontend Spec](frontend-spec)
+- [Infrastructure](infrastructure-design)
+- [API Docs](api-documentation)
 
 **Business**
-- [Business Plan](Business-Plan)
-- [Executive Brief](Executive-Brief)
-- [Development Roadmap](Development-Roadmap)
-- [Branding Guide](Branding-Guide)
-- [AI Team Strategy](AI-Team-Strategy)
+- [Business Plan](business-plan)
+- [Executive Brief](executive-brief)
+- [Development Roadmap](development-roadmap)
+- [Branding Guide](branding-guide)
+- [AI Team Strategy](ai-team-strategy)
 
 **Operations**
-- [Operations Roadmap](Operations-Roadmap)
-- [Live Ops Playbook](Live-Operations-Playbook)
-- [Discord Management](Discord-Management)
-- [Genesis Operations](Genesis-Operations)
-- [Mystery Campaign](Mystery-Campaign)
+- [Operations Roadmap](operations-roadmap)
+- [Live Ops Playbook](live-ops-playbook)
+- [Discord Management](discord-management)
+- [Genesis Operations](genesis-operations)
+- [Mystery Campaign](mystery-campaign)
 
 **AI Development**
-- [Backend AI Guide](Backend-AI-Guide)
-- [Frontend AI Guide](Frontend-AI-Guide)
-- [Infrastructure AI Guide](Infrastructure-AI-Guide)
+- [Backend AI Guide](backend-ai-guide)
+- [Frontend AI Guide](frontend-ai-guide)
+- [Infrastructure AI Guide](infrastructure-ai-guide)
