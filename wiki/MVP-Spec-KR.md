@@ -2,8 +2,8 @@
 
 ```
 문서 정보
-├── 버전: 2.0
-├── 최종 수정일: 2025-12-19
+├── 버전: 2.1
+├── 최종 수정일: 2025-12-22
 ├── 목적: 3개월 내 PMF 검증을 위한 MVP 스펙
 ├── 대상 독자: 개발팀, 프로덕트 팀
 └── 상태: Production Ready
@@ -45,7 +45,7 @@ Sage.ai MVP
 | 알림 | 순차 발송 + 딥링크 | SNS+SQS Fan-out |
 | 보안 | Regex 필터 | + LLM Guardrail |
 | 검색 | 없음 | Hybrid Search |
-| 구조 | 단일 Next.js | Turborepo 모노레포 |
+| 구조 | Nest.js + React SPA | Turborepo 모노레포 |
 
 ### 1.3 MVP 서비스 구성
 
@@ -304,11 +304,11 @@ Phase 2에서 추가 가능:
 MVP 기술 스택
 │
 ├── Main App (Sage.ai)
-│   ├── Next.js 15 (App Router)
-│   ├── React 19
-│   ├── Tailwind CSS 4
+│   ├── React 18.3 + Vite 5
+│   ├── Tailwind CSS 3.x
 │   ├── shadcn/ui
-│   └── Zustand (상태관리)
+│   ├── Zustand 4.x (상태관리)
+│   └── TanStack Query 5.x (서버 상태)
 │
 ├── Sites (랜딩 + 바이럴)
 │   ├── Vite + React + TypeScript
@@ -318,28 +318,28 @@ MVP 기술 스택
 │   └── Recharts
 │
 ├── Backend
-│   ├── Next.js API Routes
-│   ├── Drizzle ORM
-│   └── Auth.js v5
+│   ├── Nest.js 10.x (TypeScript)
+│   ├── Prisma 5.x ORM
+│   ├── Auth.js (@auth/core)
+│   └── BullMQ 5.x (비동기 작업)
 │
 ├── AI
-│   ├── Claude 3.5 Sonnet (메인 대화)
-│   ├── Claude 3.5 Haiku (알림 요약, 바이럴 AI 코멘트)
-│   └── Vercel AI SDK (스트리밍)
+│   ├── Claude Sonnet 4 (메인 대화, Persona Agent)
+│   ├── Claude Haiku 4 (라우팅, 팩트체크, 알림 요약)
+│   └── @anthropic-ai/sdk (스트리밍)
 │
 ├── Database
-│   ├── PostgreSQL (RDS)
-│   └── Redis (ElastiCache)
+│   ├── PostgreSQL 16 (RDS)
+│   └── Redis 7.x (ElastiCache)
 │
 ├── Infrastructure
-│   ├── ECS Fargate (메인 앱)
-│   ├── S3 + CloudFront (Sites)
+│   ├── ECS Fargate (백엔드)
+│   ├── S3 + CloudFront (프론트엔드 + Sites)
 │   ├── Lambda (분석 워커)
-│   └── EventBridge (15분 Cron)
+│   └── @nestjs/schedule (15분 Cron)
 │
 └── External APIs
     ├── CoinGecko (가격)
-    ├── CryptoPanic (뉴스)
     └── Alternative.me (Fear and Greed)
 ```
 
@@ -347,20 +347,20 @@ MVP 기술 스택
 
 | 카테고리 | 기술 | 버전 | MVP 선정 이유 |
 |----------|------|------|---------------|
-| Runtime | Node.js | 22 LTS | 최신 안정 버전 |
-| Language | TypeScript | 5.7+ | 타입 안전성 |
-| Framework | Next.js | 15.5+ | App Router, 스트리밍 지원 |
-| Sites | Vite | 6.x | 빠른 빌드, React SPA |
-| UI | React | 19 | Server Components |
-| Styling | Tailwind CSS | 4.0 | 빠른 개발 |
+| Runtime | Node.js | 20 LTS | 안정적인 LTS 버전 |
+| Language | TypeScript | 5.x | 타입 안전성 |
+| Backend | Nest.js | 10.x | TypeScript 네이티브, 모듈러 구조 |
+| Frontend | React + Vite | 18.3 + 5.x | 빠른 HMR, 모던 빌드 |
+| Styling | Tailwind CSS | 3.x | 빠른 개발 |
 | Components | shadcn/ui | latest | 복사해서 쓰는 컴포넌트 |
-| State | Zustand | 5.x | 단순함, 가벼움 |
-| Data Fetching | TanStack Query | 5.x | 캐싱, 자동 리패치 |
+| State (UI) | Zustand | 4.x | 단순함, 가벼움 |
+| State (Server) | TanStack Query | 5.x | 캐싱, 자동 리패치 |
 | Animation | Framer Motion | 11.x | 선언적 애니메이션 |
 | Charts | Recharts | 2.x | React 친화적 차트 |
-| ORM | Drizzle | 0.38+ | 타입 안전, SQL 친화 |
-| Auth | Auth.js | 5.x | Google OAuth 쉬움 |
-| AI SDK | Vercel AI SDK | 4.x | 스트리밍 추상화 |
+| ORM | Prisma | 5.x | 타입 안전, 직관적 마이그레이션 |
+| Auth | Auth.js | @auth/core | Google OAuth 쉬움 |
+| Queue | BullMQ | 5.x | Redis 기반 비동기 작업 |
+| AI SDK | @anthropic-ai/sdk | latest | Claude 직접 통합, SSE 스트리밍 |
 
 ---
 
@@ -376,20 +376,21 @@ MVP Architecture
 │   ├── [WhyBitcoinFallen]     [Landing]          [App ALB]
 │   │   (Vite+React/S3)        (Vite+React/S3)        │
 │   │                                                  │
-│   │                                           [ECS Fargate]
-│   │                                            (Next.js)
+│   │   [Main App]                              [ECS Fargate]
+│   │   (Vite+React/S3)                          (Nest.js)
 │   │                                                 │
 │   └──────────────────────────────────────────────────┤
 │                                                      │
 │   ┌──────────────┬──────────────┬──────────────┬─────┴────┐
 │   │              │              │              │          │
 │   v              v              v              v          v
-│ [PostgreSQL]  [Redis]     [Claude API]   [CoinGecko]   [CryptoPanic]
-│   (RDS)     (ElastiCache)                              [Fear&Greed]
+│ [PostgreSQL]  [Redis]     [Claude API]   [CoinGecko]   [Alternative.me]
+│   (RDS)     (ElastiCache)  (Sonnet 4)                  (Fear&Greed)
+│                            (Haiku 4)
 │
 └── Background Processing
-    ├── [EventBridge]  -->  [Lambda]  -->  [Discord Webhook]
-    │   (15분 Cron)        (분석기)        [PWA Push]
+    ├── [@nestjs/schedule]  -->  [BullMQ]  -->  [Discord Webhook]
+    │   (15분 Cron)              (Worker)       [PWA Push]
     └──────────────────────────────────────────────────────
 ```
 
@@ -914,9 +915,9 @@ sage-ai/
 │       ├── tailwind.config.js
 │       └── package.json
 │
-├── drizzle/
+├── prisma/
 ├── .env.example
-├── next.config.ts
+├── nest-cli.json
 └── package.json
 ```
 
@@ -953,9 +954,10 @@ sage-ai/
 Week 1: 프로젝트 셋업 + 인프라
 │
 ├── Day 1 (월): 프로젝트 초기화
-│   ├── Next.js 15 프로젝트 생성
+│   ├── Nest.js 10.x 백엔드 프로젝트 생성
+│   ├── Vite + React 18.3 프론트엔드 프로젝트 생성
 │   ├── TypeScript, ESLint, Prettier 설정
-│   ├── Tailwind CSS 4 + shadcn/ui 설치
+│   ├── Tailwind CSS 3.x + shadcn/ui 설치
 │   └── 폴더 구조 잡기
 │
 ├── Day 2 (화): Git + CI 설정
@@ -969,7 +971,7 @@ Week 1: 프로젝트 셋업 + 인프라
 │   └── 보안그룹 설정
 │
 ├── Day 4 (목): ORM + 캐시 연결
-│   ├── Drizzle ORM 설정
+│   ├── Prisma 5.x ORM 설정
 │   ├── ioredis 설정
 │   └── 연결 테스트
 │
@@ -978,15 +980,15 @@ Week 1: 프로젝트 셋업 + 인프라
 │   ├── chats, messages 테이블
 │   └── 마이그레이션 실행
 │
-└── [산출물]: Next.js + DB + Redis 연결 완료
+└── [산출물]: Nest.js + React + DB + Redis 연결 완료
 
 
 Week 2: 인증 + 바이럴/랜딩 사이트
 │
 ├── Day 1 (월): Auth.js 설정
-│   ├── next-auth v5 설치
+│   ├── @auth/core 설치
 │   ├── Google OAuth 설정
-│   └── Drizzle 어댑터 연결
+│   └── Prisma 어댑터 연결
 │
 ├── Day 2 (화): 로그인 UI + 미들웨어
 │   ├── /login 페이지
@@ -1047,7 +1049,7 @@ Week 3: AI 채팅 기본
 │   └── 페르소나 테스트
 │
 ├── Day 3 (수): SSE 스트리밍
-│   ├── Vercel AI SDK 연동
+│   ├── @anthropic-ai/sdk 연동
 │   ├── streamText + toDataStreamResponse
 │   └── 클라이언트 useChat
 │
@@ -1585,7 +1587,7 @@ MVP (8주)                          Phase 2
 
 | 주차 | 목표 | 완료 기준 | 체크 |
 |------|------|-----------|------|
-| W1 | 프로젝트 셋업 | Next.js + DB + Redis 연결 | [ ] |
+| W1 | 프로젝트 셋업 | Nest.js + React + DB + Redis 연결 | [ ] |
 | W2 | 인증 + 사이트 | 로그인 + WhyBitcoinFallen + 랜딩 | [ ] |
 | W3 | 채팅 기본 | 월렛 버핏 스트리밍 대화 | [ ] |
 | W4 | 채팅 고도화 | 시장 데이터 + 프로필 추론 | [ ] |
