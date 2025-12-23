@@ -181,7 +181,7 @@ GTM Dual Hook Strategy
 ├── Hook 1: WhyBitcoinFallen.com (바이럴)
 │   ├── 컨셉: 넷플릭스 fast.com 벤치마킹
 │   ├── 기능: 접속 즉시 "오늘 비트코인이 왜 떨어졌는지" 3줄 요약
-│   └── 목표: 일 방문자 10,000+ → Sage.ai 유입
+│   └── 목표: 월 방문자 10,000+ → Sage.ai 유입
 │
 └── Hook 2: Sage.ai 랜딩 (전환)
     ├── 컨셉: "어제 월렛 버핏의 말을 들었다면..."
@@ -277,18 +277,18 @@ interface MoatAnalysis {
 
 | 분기 | 핵심 목표 | 마일스톤 | KPI |
 |------|-----------|----------|-----|
-| Q1 | MVP 검증 | Beta 런칭, 초기 마케팅 | WhyBitcoinFallen 일 10K+, Sage.ai MAU 5K+ |
-| Q2 | 글로벌 확장 | 멀티 채팅, 4개 언어 | MAU 20K+ |
-| Q3 | 지표 개선 | 유료 구독 런칭, ICO 준비 | MAU 40K+, 유료 1K+ |
-| Q4 | ICO 본격화 | 토큰 상장, 생태계 확장 | MAU 100K+ |
+| Q1 | MVP 검증 | Beta 런칭, 초기 마케팅 | WhyBitcoinFallen 월 10K+, Sage.ai MAU 2K+ |
+| Q2 | 글로벌 확장 | 멀티 채팅, 4개 언어 | MAU 5K+ |
+| Q3 | 지표 개선 | 유료 구독 런칭, ICO 준비 | MAU 15K+, 유료 225+ |
+| Q4 | ICO 본격화 | 토큰 상장, 생태계 확장 | MAU 30K+ |
 
 ### 9.2 2026년 말 목표
 
 | 지표 | 목표 |
 |------|------|
-| WhyBitcoinFallen.com 일 방문자 | 100,000+ |
-| Sage.ai MAU | 10,000+ |
-| 유료 구독자 | 500+ (전환율 5%) |
+| WhyBitcoinFallen.com 월 방문자 | 100,000+ |
+| Sage.ai MAU | 30,000+ |
+| 유료 구독자 | 450+ (전환율 1.5%) |
 | Discord DAU | 1,000+ |
 | Shadow Portfolio ROI | 벤치마크 +3%p |
 

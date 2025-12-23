@@ -150,16 +150,16 @@
 
 | 분기 | 핵심 목표 | 주요 지표 |
 |------|-----------|-----------|
-| **Q1** | MVP 검증 | WhyBitcoinFallen 일 방문자 10K+<br>Sage.ai MAU 5K+ |
-| **Q2** | 글로벌 확장 | 멀티 채팅 + 4개 언어<br>MAU 20K+ |
-| **Q3** | 지표 개선 | 유료 구독 런칭<br>MAU 40K+ |
-| **Q4** | ICO 본격화 | 생태계 확장<br>MAU 100K+ |
+| **Q1** | MVP 검증 | WhyBitcoinFallen 월 방문자 10K+<br>Sage.ai MAU 2K+ |
+| **Q2** | 글로벌 확장 | 멀티 채팅 + 4개 언어<br>MAU 5K+ |
+| **Q3** | 지표 개선 | 유료 구독 런칭<br>MAU 15K+ |
+| **Q4** | ICO 본격화 | 생태계 확장<br>MAU 30K+ |
 
 ### 2026년 말 예상 성과
 
-- WhyBitcoinFallen.com 일 방문자: 100,000+
-- Sage.ai MAU: 10,000+
-- 유료 구독자: 500+ (전환율 5%)
+- WhyBitcoinFallen.com 월 방문자: 100,000+
+- Sage.ai MAU: 30,000+
+- 유료 구독자: 450+ (전환율 1.5%)
 - Discord DAU: 1,000+
 - Shadow Portfolio ROI: 벤치마크 +3%p
 

@@ -563,7 +563,7 @@ enum NotificationType {
 ```typescript
 interface KeyMetrics {
   acquisition: {
-    wbf_visitors: "WhyBitcoinFallen 일 방문자";
+    wbf_visitors: "WhyBitcoinFallen 월 방문자";
     wbf_to_sage_ctr: "WBF → Sage.ai 클릭률";
     signup_conversion: "가입 전환율";
   };
@@ -595,8 +595,8 @@ interface KeyMetrics {
 
 | 지표 | 목표 (3개월 후) |
 |------|----------------|
-| WhyBitcoinFallen 방문자 | 일 1,000+ |
-| Sage.ai MAU | 500+ |
+| WhyBitcoinFallen 월 방문자 | 10,000+ |
+| Sage.ai MAU | 2,000+ |
 | 베타 테스터 NPS | 40+ |
 | 환각률 | <1% |
 | 섀도우 포트폴리오 사용률 | 30%+ |

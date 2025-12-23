@@ -74,7 +74,7 @@ interface SageSolution {
 ```
 Dual Hook Strategy
 ├── 1. WhyBitcoinFallen.com (Viral Hook)
-│   └── 목표: 일 방문자 10,000+
+│   └── 목표: 월 방문자 10,000+ (Q1)
 └── 2. Sage.ai Landing (Conversion Hook)
     └── 목표: 가입 전환율 10%+
 ```
@@ -90,18 +90,18 @@ Dual Hook Strategy
 
 | 분기 | 목표 | 핵심 마일스톤 |
 |------|------|-------------|
-| Q1 | MVP 검증 | WhyBitcoinFallen.com 런칭 + Sage.ai MVP, MAU 5,000+ |
-| Q2 | 글로벌 확장 | 멀티 채팅 기능 + 4개 언어 지원, MAU 20,000+ |
-| Q3 | 지표 개선 | 유료 구독 모델 런칭 + ICO 준비, MAU 40,000+ |
-| Q4 | ICO & 확장 | ICO 본격화 + 생태계 구축, MAU 100,000+ |
+| Q1 | MVP 검증 | WhyBitcoinFallen.com 런칭 + Sage.ai MVP, MAU 2,000+ |
+| Q2 | 글로벌 확장 | 멀티 채팅 기능 + 4개 언어 지원, MAU 5,000+ |
+| Q3 | 지표 개선 | 유료 구독 모델 런칭 + ICO 준비, MAU 15,000+ |
+| Q4 | ICO & 확장 | ICO 본격화 + 생태계 구축, MAU 30,000+ |
 
 ### 1.10 2026년 말 예상 성과
 
-| 지표 | 목표 |
+| 지표 | 목표 (2026 Q4) |
 |------|------|
-| WhyBitcoinFallen.com 일 방문자 | 100,000+ |
-| Sage.ai MAU | 10,000+ |
-| 유료 구독자 | 500+ (전환율 5%) |
+| WhyBitcoinFallen.com 월 방문자 | 100,000+ |
+| Sage.ai MAU | 30,000+ |
+| 유료 구독자 | 450+ (전환율 1.5%) |
 | Discord DAU | 1,000+ |
 | Shadow Portfolio ROI | 목표 벤치마크 +3%p |
 
@@ -173,10 +173,10 @@ Dual Hook Strategy
 ```
 2026년 목표
 ├── WhyBitcoinFallen.com (바이럴 사이트)
-│   └── 일 방문자: 100,000+
+│   └── 월 방문자: 100,000+
 ├── Sage.ai (메인 서비스)
-│   ├── MAU: 10,000+ (연말 기준)
-│   ├── 유료 구독자: 500+ (전환율 5%)
+│   ├── MAU: 30,000+ (연말 기준)
+│   ├── 유료 구독자: 450+ (전환율 1.5%)
 │   └── Discord DAU: 1,000+
 └── 제품
     ├── 4개 언어 지원 (한/영/일/중)
@@ -658,7 +658,7 @@ interface CompetitiveAdvantages {
 
 **목적:** 대중의 궁금증(Why)을 즉시 해소하며 브랜드 인지도 확보
 
-**목표:** 일 방문자 10,000+
+**목표:** 월 방문자 10,000+ (Q1)
 
 #### Phase 0-B: Conversion Hook - Sage.ai Landing Page
 
@@ -710,11 +710,11 @@ GTM Funnel
 
 | 단계 | 지표 | 2026년 말 목표 | 측정 방법 |
 |------|------|---------------|----------|
-| Awareness | WhyBitcoinFallen.com 일 방문자 | 100,000+ | 바이럴 사이트 일 UV |
-| Acquisition | Sage.ai 랜딩 방문 | 1,000+/일 | 랜딩 페이지 UV |
+| Awareness | WhyBitcoinFallen.com 월 방문자 | 100,000+ | 바이럴 사이트 월 UV |
+| Acquisition | Sage.ai 랜딩 방문 | 300+/일 | 랜딩 페이지 UV |
 | Activation | 가입 전환율 | 10%+ | 랜딩 → 가입 |
-| Retention | Sage.ai MAU | 10,000+ | 월간 활성 사용자 |
-| Revenue | 유료 구독자 | 5,000+ | Free → Pro/Premium (전환율 5%) |
+| Retention | Sage.ai MAU | 30,000+ | 월간 활성 사용자 |
+| Revenue | 유료 구독자 | 450+ | Free → Pro/Premium (전환율 1.5%) |
 | Referral | NPS | 50+ | 분기별 설문 |
 
 ### 12.2 핵심 성과 지표
@@ -794,9 +794,9 @@ GTM Funnel
 
 **Q1 산출물:**
 - WhyBitcoinFallen.com 라이브 (한/영 동시 지원)
-- WhyBitcoinFallen.com 일 방문자: 1,000+
+- WhyBitcoinFallen.com 월 방문자: 10,000+
 - Sage.ai MVP 베타 버전 (한/영 UI)
-- Sage.ai MAU: 5,000+
+- Sage.ai MAU: 2,000+
 - Waitlist 1,000명 이상 확보
 - Discord 커뮤니티 DAU: 200+
 - 환각률: 1% 미만
@@ -812,7 +812,7 @@ GTM Funnel
 | 6월 | 기능 확장 | 멀티 채팅 베타 런칭, 일본어/중국어 버전 런칭, 국가별 커뮤니티 확장 (Telegram/Line) |
 
 **Q2 산출물:**
-- WhyBitcoinFallen.com 일 방문자: 5,000+
+- WhyBitcoinFallen.com 월 방문자: 20,000+
 - Sage.ai MAU: 20,000+
 - 멀티 채팅 기능 정식 오픈
 - 4개 언어 지원 (한/영/일/중)
@@ -829,9 +829,9 @@ GTM Funnel
 | 9월 | ICO 준비 | 백서(Whitepaper) 작성, 토큰 스마트 컨트랙트 개발, ICO 플랫폼 선정 및 계약, 마케팅 자료 제작 |
 
 **Q3 산출물:**
-- WhyBitcoinFallen.com 일 방문자: 8,000+
+- WhyBitcoinFallen.com 월 방문자: 50,000+
 - Sage.ai MAU: 40,000+
-- 유료 구독자: 1,000+ (전환율 2.5%)
+- 유료 구독자: 500+ (전환율 1.25%)
 - Retention: 40%+
 - NPS: 40점+
 - ICO 백서 및 법적 준비 완료
@@ -848,9 +848,9 @@ GTM Funnel
 | 12월 | 생태계 확장 | 토큰 유틸리티 구현 (거버넌스, 스테이킹 등), B2B API 파트너십 확보, 2027년 로드맵 발표 |
 
 **Q4 산출물:**
-- WhyBitcoinFallen.com 일 방문자: 10,000+
-- Sage.ai MAU: 100,000+
-- 유료 구독자: 5,000+ (전환율 5%)
+- WhyBitcoinFallen.com 월 방문자: 100,000+
+- Sage.ai MAU: 30,000+
+- 유료 구독자: 450+ (전환율 1.5%)
 - ICO 완료 및 토큰 상장
 - B2B 파트너: 2-3개 확보
 - Discord DAU: 1,000+
@@ -888,10 +888,10 @@ gantt
 
 | 분기 | 이정표 | 핵심 성공 지표 (KPI) |
 |------|--------|---------------------|
-| Q1 | MVP 검증 완료 | WhyBitcoinFallen 일 방문자: 10,000+, Sage.ai MAU: 500+, Waitlist: 100명+, 환각률: 1% 미만, Discord DAU: 100+ |
-| Q2 | 글로벌 확장 | WhyBitcoinFallen 일 방문자: 15,000+, Sage.ai MAU: 1,000+, 멀티 채팅 기능 오픈, 4개 언어 지원, Discord DAU: 500+ |
-| Q3 | 지표 개선 & ICO 준비 | WhyBitcoinFallen 일 방문자: 80,000+, Sage.ai MAU: 4,000+, 유료 구독자: 100+ (전환율 2.5%), Retention: 40%+, NPS: 40점+, ICO 백서 완료, Discord DAU: 800+ |
-| Q4 | ICO & 생태계 확장 | WhyBitcoinFallen 일 방문자: 100,000+, Sage.ai MAU: 10,000+, 유료 구독자: 500+ (전환율 5%), ICO 완료 및 토큰 상장, B2B 파트너: 2-3개, Discord DAU: 1,000+ |
+| Q1 | MVP 검증 완료 | WhyBitcoinFallen 월 방문자: 10,000+, Sage.ai MAU: 2,000+, 유료 구독자: 30+, 환각률: 1% 미만, Discord DAU: 200+ |
+| Q2 | 글로벌 확장 | WhyBitcoinFallen 월 방문자: 20,000+, Sage.ai MAU: 5,000+, 유료 구독자: 75+, 4개 언어 지원, Discord DAU: 500+ |
+| Q3 | 지표 개선 & ICO 준비 | WhyBitcoinFallen 월 방문자: 50,000+, Sage.ai MAU: 15,000+, 유료 구독자: 225+, Retention: 40%+, NPS: 50+, Discord DAU: 800+ |
+| Q4 | ICO & 생태계 확장 | WhyBitcoinFallen 월 방문자: 100,000+, Sage.ai MAU: 30,000+, 유료 구독자: 450+, ICO 완료, B2B 파트너: 2-3개, Discord DAU: 1,000+ |
 
 ### 14.7 분기별 주요 Focus
 
@@ -926,15 +926,15 @@ gantt
 
 | 지표 | Q1 | Q2 | Q3 | Q4 (연말 목표) |
 |------|----|----|----|--------------:|
-| WhyBitcoinFallen 일 방문자 | 10,000+ | 50,000+ | 80,000+ | 100,000+ |
-| Sage.ai MAU | 500+ | 2,000+ | 4,000+ | 10,000+ |
+| WhyBitcoinFallen 월 방문자 | 10,000+ | 20,000+ | 50,000+ | 100,000+ |
+| Sage.ai MAU | 2,000+ | 5,000+ | 15,000+ | 30,000+ |
 
 ### B. 수익화 지표
 
 | 지표 | Q1 | Q2 | Q3 | Q4 (연말 목표) |
 |------|----|----|----|--------------:|
-| 유료 구독자 | 0 | 0 | 100+ | 500+ |
-| 전환율 | - | - | 2.5% | 5% |
+| 유료 구독자 | 30+ | 75+ | 225+ | 450+ |
+| 전환율 | 1.5% | 1.5% | 1.5% | 1.5% |
 
 ### C. 커뮤니티 지표
 

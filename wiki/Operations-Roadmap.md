@@ -320,7 +320,7 @@ interface ScaleCampaigns {
 - Online conference hosting ("AI & Crypto Investment Summit")
 - Offline meetups (Seoul, Tokyo, Singapore)
 
-**Target**: MAU 100,000+, Discord DAU 1,000+
+**Target**: MAU 30,000+, Discord DAU 1,000+
 
 ---
 
