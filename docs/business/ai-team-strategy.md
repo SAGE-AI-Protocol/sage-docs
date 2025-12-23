@@ -180,7 +180,7 @@ const goodPrompt = `Create a NestJS user service that:
 1. **블라인드 신뢰 금지** - AI 코드는 반드시 검증, 특히 보안 관련 코드
 2. **너무 큰 변경 요청**
    ```
-   ❌ "Refactor the entire codebase to use hexagonal architecture"
+   ❌ "Refactor the entire codebase to use a new architecture pattern"
    ✅ "Refactor src/modules/portfolio to separate domain logic from infrastructure"
    ```
 3. **컨텍스트 없는 질문**

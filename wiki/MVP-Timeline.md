@@ -1,140 +1,150 @@
-# MVP Timeline (8 Weeks)
+# MVP Timeline (12 Weeks)
 
 ## Overview
 
-**Goal**: Launch beta with 3 core features in 8 weeks
+**Goal**: Launch beta with 3 core features in 12 weeks
 - Chat with Wallet Buffett AI
 - Shadow Portfolio tracking
 - Proactive market analysis (15-minute intervals)
 
+**Tech Stack**: Nest.js 10.x + Prisma 5.x + React 18.3 + Vite 5
+
 ---
 
-## Week 1-2: Foundation
+## Month 1 (Week 1-4): Foundation
 
-### Infrastructure
+### Week 1-2: Infrastructure
+
+#### AWS Setup
 - [ ] AWS account setup + Terraform modules
 - [ ] ECS Fargate cluster (dev + prod)
-- [ ] RDS PostgreSQL 16+ (db.t3.micro)
+- [ ] RDS PostgreSQL 16 (db.t3.micro)
 - [ ] ElastiCache Redis 7.x (cache.t3.micro)
 - [ ] S3 buckets + CloudFront distributions
 
-### Backend Foundation
-- [ ] Django 5.1+ project setup
-- [ ] Hexagonal architecture folder structure
-- [ ] Django ORM models (User, Chat, Message, Profile)
-- [ ] Django-Allauth Google OAuth
-- [ ] Django Admin customization
-- [ ] Alembic-style migrations
+#### Backend Foundation
+- [ ] Nest.js 10.x project setup
+- [ ] Layered + Domain folder structure
+- [ ] Prisma 5.x schema (User, Chat, Message, Profile)
+- [ ] Prisma migrations setup
+- [ ] Auth.js (@auth/core) Google OAuth
+- [ ] @nestjs/swagger configuration
 
-### Frontend Foundation
-- [ ] Turborepo monorepo setup
-- [ ] Vite 6 + React 19 projects (3 apps)
-- [ ] Tailwind CSS 4 + shadcn/ui
-- [ ] TanStack Query setup
-- [ ] Zustand store setup
+#### Frontend Foundation
+- [ ] Vite 5 + React 18.3 projects (3 apps)
+- [ ] Tailwind CSS + shadcn/ui
+- [ ] TanStack Query 5.x setup
+- [ ] Zustand 4.x store setup
 
-### Sites
+### Week 3-4: Hook Sites + Basic Backend
+
+#### Sites
 - [ ] WhyBitcoinFallen.com (Vite + React)
 - [ ] Sage.ai landing page
+- [ ] Email collection + waitlist
+
+#### Backend Core
+- [ ] Module structure (auth, chat, market, portfolio)
+- [ ] Common utilities (guards, interceptors, filters)
+- [ ] Error handling + logging
+- [ ] Health check endpoints
 
 ---
 
-## Week 3-4: Core Chat
+## Month 2 (Week 5-8): Core Features
 
-### AI Integration
-- [ ] Anthropic Python SDK setup
+### Week 5-6: AI Chat Integration
+
+#### AI Integration
+- [ ] @anthropic-ai/sdk setup
 - [ ] Multi-agent orchestration
-  - [ ] Manager Agent (intent routing)
-  - [ ] Analyst Agent (fact gathering)
-  - [ ] Persona Agent (Buffett philosophy)
-  - [ ] Risk Agent (validation)
+  - [ ] Manager Agent (intent routing - Haiku 4)
+  - [ ] Analyst Agent (fact gathering - Haiku 4)
+  - [ ] Persona Agent (Buffett philosophy - Sonnet 4)
+  - [ ] Risk Agent (validation - Haiku 4)
 - [ ] System prompts (Wallet Buffett persona)
 - [ ] Tool definitions (market data, calculations)
 
-### Backend Chat
+#### Backend Chat
 - [ ] Chat service (business logic)
-- [ ] Message repository (Django ORM)
-- [ ] Django Channels setup (SSE streaming)
+- [ ] Message repository (Prisma)
+- [ ] SSE streaming (@nestjs/sse)
 - [ ] Context management (20-message window)
 - [ ] User profile inference (from conversation)
 
-### External APIs
+#### External APIs
 - [ ] CoinGecko adapter (price data)
-- [ ] CryptoPanic adapter (news)
 - [ ] Alternative.me adapter (Fear & Greed)
 - [ ] Redis caching (5/10/30 min TTL)
 
-### Frontend Chat
+### Week 7-8: Frontend Chat + Portfolio Backend
+
+#### Frontend Chat
 - [ ] Chat UI (message bubbles, input)
 - [ ] SSE client (EventSource)
 - [ ] Streaming message display
 - [ ] Markdown rendering
 - [ ] Code syntax highlighting
 
-### Testing
+#### Backend Portfolio
+- [ ] Shadow trade repository (Prisma)
+- [ ] Portfolio service (ROI calculation)
+- [ ] Signal extraction from Claude responses
+- [ ] Daily ROI cron (@nestjs/schedule)
+- [ ] Benchmark comparison (BTC, ETH)
+
+#### Testing
 - [ ] Unit tests (domain layer)
 - [ ] Integration tests (API endpoints)
 - [ ] Hallucination rate measurement
 
 ---
 
-## Week 5-6: Shadow Portfolio
+## Month 3 (Week 9-12): Polish & Launch
 
-### Backend Portfolio
-- [ ] Shadow trade repository
-- [ ] Portfolio service (ROI calculation)
-- [ ] Signal extraction from Claude responses
-- [ ] Daily ROI cron (Celery Beat)
-- [ ] Benchmark comparison (BTC, ETH)
+### Week 9-10: Portfolio UI + Proactive Analysis
 
-### Frontend Portfolio
+#### Frontend Portfolio
 - [ ] Portfolio page
 - [ ] Performance chart (Recharts)
 - [ ] [담아보기] button in chat
 - [ ] Trade history table
 - [ ] ROI vs benchmark display
 
-### Market Data Integration
-- [ ] Real-time price updates (WebSocket or polling)
-- [ ] News feed integration
-- [ ] Fear & Greed index display
+#### Background Jobs
+- [ ] BullMQ 5.x + Redis configuration
+- [ ] @nestjs/schedule for 15-minute cron
+- [ ] BullMQ worker for async jobs
 
----
-
-## Week 7-8: Proactive Analysis + Deployment
-
-### Celery Setup
-- [ ] Celery + Redis configuration
-- [ ] Celery Beat scheduler setup
-- [ ] Celery worker Dockerfile
-
-### Market Analysis Task
-- [ ] 15-minute market analysis task
+#### Market Analysis
+- [ ] 15-minute market analysis job
 - [ ] Context generation (volatility, sentiment, news)
 - [ ] Alert threshold logic
 - [ ] Discord webhook integration
 - [ ] PWA push notification integration
 
-### Deep Linking
+### Week 11-12: Deep Linking + Deployment
+
+#### Deep Linking
 - [ ] `/chat/new?context=market_alert` routing
 - [ ] Pre-filled context in chat input
 - [ ] Analytics tracking
 
-### Deployment
+#### Deployment
 - [ ] Docker multi-stage builds
-- [ ] ECS task definitions (Django + Celery worker + Beat)
+- [ ] ECS task definitions (Nest.js + BullMQ worker)
 - [ ] GitHub Actions CI/CD
 - [ ] Environment variables management (AWS Secrets Manager)
 - [ ] Health checks
-- [ ] Monitoring (CloudWatch)
+- [ ] Monitoring (CloudWatch + Sentry)
 
-### Testing & QA
+#### Testing & QA
 - [ ] Integration tests (full flow)
 - [ ] Performance tests (2-second response target)
 - [ ] Security audit (OWASP top 10)
 - [ ] Load testing (1,000 concurrent users)
 
-### Beta Launch
+#### Beta Launch
 - [ ] 10-20 beta testers recruited
 - [ ] Feedback collection system
 - [ ] Bug tracking (GitHub Issues)
@@ -142,7 +152,7 @@
 
 ---
 
-## Success Criteria (Week 8)
+## Success Criteria (Week 12)
 
 | Metric | Target |
 |--------|--------|
@@ -172,5 +182,6 @@
 
 ---
 
-**Last Updated**: 2025년 12월 17일
-**Timeline**: 8 weeks → Beta launch
+**Last Updated**: 2025년 12월 23일
+**Timeline**: 12 weeks (3 months) → Beta launch
+**Stack**: Nest.js 10.x + Prisma 5.x + React 18.3 + TypeScript

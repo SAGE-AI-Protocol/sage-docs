@@ -10,7 +10,7 @@ This repository (`sage-docs`) contains all technical specifications, business do
 
 **Key Differentiators**:
 - **Wallet Buffett AI Mentor**: Claude Sonnet 4-based multi-agent system
-- **Shadow Portfolio**: Transparent performance tracking (Target: ROI +18.5%, Hit Rate 72.3%)
+- **Shadow Portfolio**: Transparent performance tracking (Target: Benchmark +3%p, Hit Rate 72.3%)
 - **Proactive Analysis**: 15-min automatic market analysis with PWA Push + Discord notifications
 - **Conversational Onboarding**: No surveys - profile inferred from natural conversation
 

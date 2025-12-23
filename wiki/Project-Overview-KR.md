@@ -32,7 +32,7 @@ interface SageSolution {
   };
   shadowPortfolio: {
     description: "섀도우 포트폴리오";
-    targets: { roi: "+18.5%", hitRate: "72.3%" };
+    targets: { roi: "벤치마크 +3%p", hitRate: "72.3%" };
   };
   proactiveAnalysis: {
     description: "능동적 분석";
@@ -277,10 +277,10 @@ interface CoreValues {
 
 | 에이전트 | 모델 | 핵심 기술 | 역할 |
 |---------|------|----------|------|
-| Manager | Sonnet 3.5 | Router, State Manager | 대화 흐름 조율, 적절한 에이전트 연결 |
-| Analyst | Haiku 3.5 | Search API, Price Fetcher, Calculator | 감정 배제, 시장 현상(Fact) 수집 |
-| Persona | Sonnet 3.5 | Style Transfer, Reasoning | **월렛 버핏**: 통찰과 가르침 전달 |
-| Risk | Sonnet 3.5 | Compliance Check, Fact Verification | 사실 오류/법적 위험 최종 확인 |
+| Manager | Haiku 4 | Router, State Manager | 대화 흐름 조율, 적절한 에이전트 연결 |
+| Analyst | Haiku 4 | Search API, Price Fetcher, Calculator | 감정 배제, 시장 현상(Fact) 수집 |
+| Persona | Sonnet 4 | Style Transfer, Reasoning | **월렛 버핏**: 통찰과 가르침 전달 |
+| Risk | Haiku 4 | Compliance Check, Fact Verification | 사실 오류/법적 위험 최종 확인 |
 
 ### 6.3 핵심 기능
 
@@ -367,9 +367,9 @@ interface CoreValues {
 |------|------|
 | 시작일 | 2025.01.15 |
 | 초기 자본 | $10,000 (가상) |
-| 목표 수익률 | +18.5% |
-| 벤치마크(BTC) | +12.3% |
-| 목표 초과 수익 | +6.2%p |
+| 목표 수익률 | 벤치마크 +3%p |
+| 벤치마크(BTC) | - |
+| 목표 초과 수익 | +3%p |
 
 **목표 성과 지표:**
 

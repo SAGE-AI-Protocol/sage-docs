@@ -241,7 +241,7 @@ interface DiscordAlertPayload {
     ];
     footer: {
       text: "Wallet Buffett AI Analysis";
-      icon_url: "https://sage-ai.com/avatar.png";
+      icon_url: "https://sage.ai/avatar.png";
     };
     timestamp: string;    // ISO timestamp
   }];
@@ -251,7 +251,7 @@ interface DiscordAlertPayload {
       type: 2,              // Button
       style: 5,             // Link
       label: "Full Analysis on Sage.ai";
-      url: "https://app.sage-ai.com/chat/new?context=market_alert&symbol=BTC";
+      url: "https://app.sage.ai/chat/new?context=market_alert&symbol=BTC";
     }]
   }];
 }
@@ -471,7 +471,7 @@ Discord Application 설정
 │   └── 이름: "Sage.ai"
 │
 ├── 2. OAuth2 설정
-│   ├── Redirects: https://app.sage-ai.com/api/auth/discord/callback
+│   ├── Redirects: https://app.sage.ai/api/auth/discord/callback
 │   └── Scopes: identify, guilds.join
 │
 ├── 3. Bot 생성
@@ -527,7 +527,7 @@ async function handleDiscordCallback(code: string, userId: string) {
       client_secret: process.env.DISCORD_CLIENT_SECRET,
       grant_type: 'authorization_code',
       code,
-      redirect_uri: 'https://app.sage-ai.com/api/auth/discord/callback',
+      redirect_uri: 'https://app.sage.ai/api/auth/discord/callback',
     }),
   });
 
@@ -612,7 +612,7 @@ export function DiscordLinkButton() {
   const handleLink = () => {
     const params = new URLSearchParams({
       client_id: process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID!,
-      redirect_uri: 'https://app.sage-ai.com/api/auth/discord/callback',
+      redirect_uri: 'https://app.sage.ai/api/auth/discord/callback',
       response_type: 'code',
       scope: 'identify guilds.join',
       state: user.id,  // CSRF 방지용
@@ -713,7 +713,7 @@ const alertButton = {
   type: 2,           // Button
   style: 5,          // Link style
   label: "Discuss with Wallet Buffett",
-  url: `https://app.sage-ai.com/chat/new?` +
+  url: `https://app.sage.ai/chat/new?` +
        `context=discord_alert&` +
        `symbol=${symbol}&` +
        `change=${changePercent}`
@@ -775,7 +775,7 @@ Wallet Buffett의 조언:
 - 레버리지 포지션을 확인하세요
 - 장기적 관점을 유지하세요
 
-자세한 분석: https://app.sage-ai.com
+자세한 분석: https://app.sage.ai
 ```
 
 **Scam Warning:**
@@ -786,7 +786,7 @@ DM으로 투자 권유나 링크를 보내는 사람을 조심하세요!
 
 기억하세요:
 - Admin/Mod는 절대 먼저 DM하지 않습니다
-- 공식 링크: sage-ai.com만 사용하세요
+- 공식 링크: sage.ai만 사용하세요
 - 의심되면 즉시 신고하세요
 
 의심스러운 DM을 받으셨다면 스크린샷과 함께 #help에 신고해주세요.

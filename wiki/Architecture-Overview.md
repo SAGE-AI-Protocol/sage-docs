@@ -2,48 +2,48 @@
 
 ## High-Level Architecture
 
-Sage.ai follows a **Hexagonal Architecture (Ports & Adapters)** pattern with complete backend/frontend separation.
+Sage.ai follows a **Layered + Domain Architecture (Clean Lite)** pattern with complete backend/frontend separation.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     React SPA Frontend                       │
-│         (Vite 6 + React 19 + TypeScript)                    │
+│         (Vite 5 + React 18.3 + TypeScript)                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │   Main App   │  │   Landing    │  │ Bitcoin      │      │
 │  │              │  │    Page      │  │  Fallen      │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
-                            ▲
-                            │ REST API + SSE
-                            │
+                           ▲
+                           │ REST API + SSE
+                           │
 ┌─────────────────────────────────────────────────────────────┐
-│                  Django Backend (Hexagonal)                  │
+│              Nest.js Backend (Layered + Domain)              │
 │                                                              │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │              Presentation Layer                     │    │
-│  │  (DRF ViewSets, Serializers, Django Channels)      │    │
+│  │  (Controllers, DTOs, Guards, Swagger Decorators)   │    │
 │  └────────────────────────────────────────────────────┘    │
-│                            ▲                                 │
-│                            │                                 │
+│                           ▲                                 │
+│                           │                                 │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │              Application Layer                      │    │
 │  │  (Use Cases, Services, Business Logic)             │    │
 │  └────────────────────────────────────────────────────┘    │
-│                            ▲                                 │
-│                            │                                 │
+│                           ▲                                 │
+│                           │                                 │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │              Domain Layer                           │    │
-│  │  (Entities, Value Objects, Ports)                  │    │
+│  │  (Entities, Value Objects, Interfaces)             │    │
 │  └────────────────────────────────────────────────────┘    │
-│                            ▲                                 │
-│                            │                                 │
+│                           ▲                                 │
+│                           │                                 │
 │  ┌────────────────────────────────────────────────────┐    │
 │  │              Infrastructure Layer                   │    │
-│  │  (Adapters: DB, AI, External APIs, Cache)          │    │
+│  │  (Prisma, Redis, Claude SDK, External APIs)        │    │
 │  └────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
-                            ▲
-                            │
+                           ▲
+                           │
 ┌─────────────────────────────────────────────────────────────┐
 │                    External Services                         │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
@@ -68,62 +68,87 @@ Sage.ai follows a **Hexagonal Architecture (Ports & Adapters)** pattern with com
 - Type synchronization via OpenAPI
 - CORS configuration needed
 
-### 2. Hexagonal Architecture
+### 2. Layered + Domain Architecture (Clean Lite)
 
 **Why**:
 - Domain logic independence
 - Easy testing (mock adapters)
 - Technology replacement flexibility
 - Clear separation of concerns
+- Simple and pragmatic for MVP speed
 
 **Structure**:
 ```
-domain/           # Pure Python, no dependencies
-  entities/       # Business objects
-  ports/          # Interfaces (ABC)
-application/      # Use cases, orchestration
-infrastructure/   # Adapters (Claude, DB, APIs)
-presentation/     # DRF ViewSets, Channels
+src/
+├── modules/                 # Feature modules
+│   ├── auth/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.module.ts
+│   │   ├── dto/
+│   │   └── guards/
+│   ├── chat/
+│   ├── ai-agents/
+│   ├── market/
+│   ├── portfolio/
+│   ├── notifications/
+│   ├── scheduler/
+│   └── jobs/
+├── common/                  # Shared utilities
+│   ├── decorators/
+│   ├── filters/
+│   ├── interceptors/
+│   └── pipes/
+├── prisma/                  # Database
+│   ├── schema.prisma
+│   └── migrations/
+└── config/                  # Configuration
 ```
 
-### 3. Django + DRF (not Next.js or FastAPI)
+### 3. Nest.js + Prisma (not Django or FastAPI)
 
-**Why Django**:
-- Django Admin: 2x faster MVP development
-- Django ORM: Mature, auto-migrations
-- Django-Allauth: Google OAuth in 5 minutes
-- Django Channels: SSE for Claude streaming
-- Battery-included: 8-week timeline critical
+**Why Nest.js**:
+- TypeScript native: Full type safety across stack
+- Modular architecture: Easy to scale to microservices
+- Built-in SSE: Streaming support for Claude responses
+- Decorator-based: Clean, readable code
+- Enterprise-ready: Dependency injection, testing utilities
+
+**Why Prisma**:
+- Type-safe queries: Auto-generated types from schema
+- Intuitive migrations: Simple CLI commands
+- Great DX: Prisma Studio for debugging
+- Performance: Optimized query engine
 
 **Trade-offs**:
-- Type safety: Python vs TypeScript (mitigated with mypy + Pydantic)
-- Async: Not pure async (but sufficient for MVP scale)
+- Learning curve for developers new to Nest.js
+- Prisma cold starts (mitigated by connection pooling)
 
-### 4. Celery Beat (not Lambda)
+### 4. BullMQ + @nestjs/schedule (not Celery)
 
 **Why**:
-- Direct Django ORM access (no VPC setup)
-- Unified codebase (no separate Lambda deploy)
-- Cost-effective (no Lambda invocation fees)
-- Better for 15-minute recurring tasks
+- Native TypeScript: No Python runtime needed
+- Nest.js integration: First-class support
+- Redis-backed: Reliable job persistence
+- Built-in retry: Automatic job retry with backoff
 
 **Usage**:
-- 15-minute market analysis
-- Automatic context generation
-- Alert distribution
+- 15-minute market analysis (@nestjs/schedule)
+- Memory extraction jobs (BullMQ)
+- Alert distribution (BullMQ)
 
 ## Multi-Agent AI System
 
 ```
 [User Question]
       ↓
-[Manager Agent] ─── Intent classification
+[Manager Agent] ─── Intent classification (Haiku 4)
       ↓
-[Analyst Agent] ─── Fetch facts (price, news)
+[Analyst Agent] ─── Fetch facts (price, news) (Haiku 4)
       ↓
-[Persona Agent] ─── Warren Buffett interpretation
+[Persona Agent] ─── Warren Buffett interpretation (Sonnet 4)
       ↓
-[Risk Agent] ────── Validate & fact-check
+[Risk Agent] ────── Validate & fact-check (Haiku 4)
       ↓
 [Final Response]
 ```
@@ -134,16 +159,16 @@ presentation/     # DRF ViewSets, Channels
 
 ### Chat Flow
 ```
-User Input → DRF API → Chat Service → Claude Multi-Agent → SSE Stream → React UI
-                ↓
-         Message Repository → PostgreSQL
-                ↓
-         User Profile Update (inferred from conversation)
+User Input → Nest.js Controller → Chat Service → Claude Multi-Agent → SSE Stream → React UI
+                    ↓
+             Prisma Repository → PostgreSQL
+                    ↓
+             User Profile Update (inferred from conversation)
 ```
 
 ### Shadow Portfolio Flow
 ```
-Claude Response → Signal Extraction → Portfolio Service → Shadow Trade Repository
+Claude Response → Signal Extraction → Portfolio Service → Prisma Repository
                                               ↓
                                         PostgreSQL + Redis Cache
                                               ↓
@@ -152,19 +177,19 @@ Claude Response → Signal Extraction → Portfolio Service → Shadow Trade Rep
 
 ### Proactive Analysis Flow
 ```
-Celery Beat (15분) → Market Analysis Task → CoinGecko + CryptoPanic + Fear & Greed
-                              ↓
-                   Context Generation + Threshold Check
-                              ↓
-                   Discord Webhook + PWA Push (if alert needed)
+@nestjs/schedule (15분) → Market Analysis Job → CoinGecko + CryptoPanic + Fear & Greed
+                                  ↓
+                       Context Generation + Threshold Check
+                                  ↓
+                       Discord Webhook + PWA Push (if alert needed)
 ```
 
 ## Security & Compliance
 
 ### Authentication
-- Django-Allauth: Google OAuth 2.0
-- Session-based auth: HttpOnly cookies
-- CSRF protection: Django built-in
+- Auth.js (@auth/core): Google OAuth 2.0
+- JWT-based auth: Access Token (1h) + Refresh Token (30d)
+- CSRF protection: SameSite cookies
 
 ### Audit Log
 - Separate `audit_log` table (append-only)
@@ -172,9 +197,10 @@ Celery Beat (15분) → Market Analysis Task → CoinGecko + CryptoPanic + Fear 
 - Fields: table_name, record_id, action, old_values, new_values, user_id, timestamp
 
 ### API Security
-- DRF permissions: IsAuthenticated
-- Rate limiting: Django-ratelimit
-- CORS: django-cors-headers (whitelist only)
+- Nest.js Guards: @UseGuards(AuthGuard)
+- Rate limiting: @nestjs/throttler
+- CORS: @nestjs/cors (whitelist only)
+- Helmet: Security headers
 
 ## Performance Targets
 
@@ -189,20 +215,25 @@ Celery Beat (15분) → Market Analysis Task → CoinGecko + CryptoPanic + Fear 
 ## Infrastructure
 
 ### Development Environment
-- Django development server
-- PostgreSQL local
-- Redis local
+- Nest.js dev server (watch mode)
+- PostgreSQL local (Docker)
+- Redis local (Docker)
 - Hot reload for frontend (Vite)
 
 ### Production (AWS)
 - **Backend**: ECS Fargate (Docker)
-  - Django app container
-  - Celery worker container
-  - Celery Beat scheduler container
-- **Database**: RDS PostgreSQL 16+ (db.t3.micro)
+  - Nest.js app container
+  - BullMQ worker container
+- **Database**: RDS PostgreSQL 16 (db.t3.micro)
 - **Cache**: ElastiCache Redis 7.x (cache.t3.micro)
 - **Frontend**: S3 + CloudFront (3 SPAs)
 - **CI/CD**: GitHub Actions
+
+### Auto-Scaling Configuration
+- ECS auto-scaling: min 2, max 10 tasks
+- CPU target tracking: 70%
+- Scale-out cooldown: 60s
+- Scale-in cooldown: 300s
 
 ### Deployment Strategy
 - **dev branch** → dev environment
@@ -211,5 +242,5 @@ Celery Beat (15분) → Market Analysis Task → CoinGecko + CryptoPanic + Fear 
 
 ---
 
-**Last Updated**: 2025년 12월 17일
-**Architecture Version**: 3.0 - Django + Hexagonal + Celery
+**Last Updated**: 2025년 12월 23일
+**Architecture Version**: 4.0 - Nest.js + Prisma + Layered Domain

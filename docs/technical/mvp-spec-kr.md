@@ -33,7 +33,7 @@ Sage.ai MVP
 
 ### 1.2 MVP vs Full 스펙 비교
 
-| 기능 | MVP (8주) | Full (Phase 2+) |
+| 기능 | MVP (12주) | Full (Phase 2+) |
 |------|-----------|-----------------|
 | AI 페르소나 | 월렛 버핏 1명 | 3명 (월렛 버핏, 사토시 현자, 알파 헌터) |
 | 채팅 구조 | 1:1 대화 | 그룹 채팅 (단톡방) + 1:1 DM |
@@ -52,8 +52,8 @@ Sage.ai MVP
 | 서비스 | 도메인 | 설명 |
 |--------|--------|------|
 | WhyBitcoinFallen.com | whybitcoinfallen.com | 바이럴 마케팅용 사이트 |
-| Sage.ai 랜딩 | sage-ai.com | 서비스 소개 페이지 |
-| Sage.ai 앱 | app.sage-ai.com | 메인 AI 멘토링 플랫폼 |
+| Sage.ai 랜딩 | sage.ai | 서비스 소개 페이지 |
+| Sage.ai 앱 | app.sage.ai | 메인 AI 멘토링 플랫폼 |
 
 ### 1.4 지원 자산 (6종)
 
@@ -923,7 +923,16 @@ sage-ai/
 
 ---
 
-## 9. 8주 개발 계획
+## 9. 12주 개발 계획
+
+> **참고**: 상세 개발 타임라인은 [MVP Timeline](./mvp-timeline.md) 문서를 참조하세요.
+> - Month 1 (Week 1-4): Foundation
+> - Month 2 (Week 5-8): Core Features
+> - Month 3 (Week 9-12): Polish & Launch
+
+---
+
+## 9-legacy. 이전 8주 개발 계획 (참고용)
 
 ### 9.1 전체 로드맵
 
@@ -1408,7 +1417,7 @@ export function AIPreview({ comment, isLoading }: AIPreviewProps) {
       {/* CTA 버튼 */}
       <div className="flex gap-3 mt-6">
         <a
-          href="https://app.sage-ai.com/chat/new?context=market_alert&symbol=BTC"
+          href="https://app.sage.ai/chat/new?context=market_alert&symbol=BTC"
           className="flex-1 bg-amber-600 hover:bg-amber-500 text-white
                      py-3 px-4 rounded-lg text-center font-semibold
                      transition-colors"
@@ -1416,7 +1425,7 @@ export function AIPreview({ comment, isLoading }: AIPreviewProps) {
           이어서 대화하기
         </a>
         <a
-          href="https://app.sage-ai.com"
+          href="https://app.sage.ai"
           className="flex-1 border border-amber-600 text-amber-400
                      hover:bg-amber-600/20 py-3 px-4 rounded-lg text-center
                      transition-colors"
@@ -1563,7 +1572,7 @@ Sage.ai 랜딩 구조
 ### 11.3 Phase 2 핵심: AI 멘토 단톡방
 
 ```
-MVP (8주)                          Phase 2
+MVP (12주)                         Phase 2
 │                                  │
 ├── [사용자] <--> [월렛 버핏]      ├── [사용자]
 │                                  │       │
@@ -1644,9 +1653,9 @@ CF_DISTRIBUTION_VIRAL="..."
 CF_DISTRIBUTION_LANDING="..."
 
 # URLs
-NEXT_PUBLIC_APP_URL="https://app.sage-ai.com"
+NEXT_PUBLIC_APP_URL="https://app.sage.ai"
 VIRAL_SITE_URL="https://whybitcoinfallen.com"
-LANDING_SITE_URL="https://sage-ai.com"
+LANDING_SITE_URL="https://sage.ai"
 ```
 
 ---

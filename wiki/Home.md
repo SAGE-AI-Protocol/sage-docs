@@ -61,7 +61,7 @@
 |------|-------|
 | Current Phase | Documentation Complete |
 | MVP Timeline | 3 months |
-| Target Metrics | 500 MAU (MVP), 10K MAU (2026 Q4) |
+| Target Metrics | 500 MAU (MVP), 5K MAU (2026 Q1), 10K MAU (2026 Q4) |
 | Architecture | TypeScript Fullstack (Nest.js + React) |
 
 ---
