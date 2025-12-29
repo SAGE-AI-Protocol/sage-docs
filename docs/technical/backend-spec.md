@@ -71,8 +71,20 @@ interface ExternalServices {
     api: "@anthropic-ai/sdk";
   };
   marketData: {
-    provider: "CoinGecko";
-    type: "REST API";
+    primary: {
+      provider: "Binance";
+      type: "WebSocket";
+      streams: "ticker@arr (실시간 가격)";
+    };
+    fallback: {
+      provider: "Gate.io";
+      type: "WebSocket";
+      streams: "ticker (실시간 가격)";
+    };
+    backup: {
+      provider: "CoinGecko";
+      type: "REST API (WebSocket 이중화 실패 시)";
+    };
   };
   fearGreed: {
     provider: "Alternative.me";
@@ -84,6 +96,12 @@ interface ExternalServices {
   };
 }
 ```
+
+**선택 근거**:
+- **실시간성**: WebSocket으로 가격 변동 즉시 감지 (15분 폴링 → 실시간)
+- **이중화**: Binance 장애 시 Gate.io로 자동 전환 (무중단)
+- **3단 fallback**: Binance → Gate.io → CoinGecko REST
+- **비용 절감**: WebSocket은 무료, REST API는 rate limit 있음
 
 ---
 
@@ -740,45 +758,368 @@ async function processNotification(job: Job<NotificationJob>) {
 
 ---
 
-## 8. Scheduled Tasks
+## 8. Real-Time Price WebSocket Service
 
-### 8.1 Price Polling Implementation
+### 8.1 WebSocket Architecture Overview
+
+**선택 근거**:
+- **실시간성**: 가격 변동 즉시 감지 및 알림 (기존 15분 폴링 → <1초 실시간)
+- **이중화**: Binance 장애 시 Gate.io로 자동 전환 (무중단 운영)
+- **비용 효율성**: WebSocket은 무료, REST API는 rate limit 제약
+- **정확성**: 거래소 실제 체결가 사용 (CoinGecko 집계 가격보다 정확)
 
 ```typescript
-interface PricePollingConfig {
-  schedule: "*/15 * * * *";  // Every 15 minutes
-  symbols: ["BTC", "ETH", "SOL", "BNB", "DOGE", "XRP"];
-  changeThresholds: {
-    BTC: 5;     // 5% change triggers alert
-    ETH: 7;     // 7% change triggers alert
-    default: 10; // 10% for others
+interface WebSocketConfig {
+  primary: {
+    provider: "Binance";
+    endpoint: "wss://stream.binance.com:9443/ws";
+    streams: ["btcusdt@ticker", "ethusdt@ticker", "solusdt@ticker", "bnbusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker"];
+    reconnect: {
+      maxRetries: 3;
+      backoff: "exponential";  // 1s → 2s → 4s
+    };
+  };
+  fallback: {
+    provider: "Gate.io";
+    endpoint: "wss://api.gateio.ws/ws/v4/";
+    streams: ["spot.tickers"];
+    reconnect: {
+      maxRetries: 3;
+      backoff: "exponential";
+    };
+  };
+  backup: {
+    provider: "CoinGecko";
+    type: "REST";
+    endpoint: "https://api.coingecko.com/api/v3/simple/price";
+    schedule: "*/5 * * * *";  // 5분마다 (WebSocket 모두 실패 시)
   };
 }
+```
 
-@Cron('*/15 * * * *')
-async function pollPrices() {
-  const symbols = ['BTC', 'ETH', 'SOL', 'BNB', 'DOGE', 'XRP'];
+### 8.2 Dual WebSocket Implementation
 
-  for (const symbol of symbols) {
-    const currentPrice = await coingeckoClient.getPrice(symbol);
-    const previousPrice = await valkey.get(`market:price:${symbol}`);
+```typescript
+// market/websocket-price.service.ts
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import WebSocket from 'ws';
+import { EventEmitter } from 'events';
 
-    // Cache new price
-    await valkey.setex(`market:price:${symbol}`, 300, currentPrice);
+@Injectable()
+export class WebSocketPriceService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(WebSocketPriceService.name);
 
-    // Check for sudden change
+  private binanceWs: WebSocket | null = null;
+  private gateioWs: WebSocket | null = null;
+
+  private activeProvider: 'binance' | 'gateio' | 'rest' = 'binance';
+  private binanceRetries = 0;
+  private gateioRetries = 0;
+
+  private readonly SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT', 'XRPUSDT'];
+  private readonly MAX_RETRIES = 3;
+
+  constructor(
+    @Inject('VALKEY_CLIENT') private readonly valkey: Redis,
+    private readonly notificationQueue: Queue
+  ) {
+    super();
+  }
+
+  async onModuleInit() {
+    await this.connectBinance();
+  }
+
+  async onModuleDestroy() {
+    this.disconnectAll();
+  }
+
+  // Primary: Binance WebSocket
+  private async connectBinance() {
+    try {
+      const streams = this.SYMBOLS.map(s => `${s.toLowerCase()}@ticker`).join('/');
+      const url = `wss://stream.binance.com:9443/stream?streams=${streams}`;
+
+      this.binanceWs = new WebSocket(url);
+
+      this.binanceWs.on('open', () => {
+        this.logger.log('✅ Binance WebSocket connected');
+        this.activeProvider = 'binance';
+        this.binanceRetries = 0;
+
+        // Gate.io 연결 끊기 (Primary 정상 동작 시)
+        if (this.gateioWs) {
+          this.gateioWs.close();
+          this.gateioWs = null;
+        }
+      });
+
+      this.binanceWs.on('message', async (data: WebSocket.Data) => {
+        if (this.activeProvider !== 'binance') return;
+
+        const parsed = JSON.parse(data.toString());
+        await this.handleBinanceMessage(parsed);
+      });
+
+      this.binanceWs.on('error', (error) => {
+        this.logger.error(`Binance WebSocket error: ${error.message}`);
+      });
+
+      this.binanceWs.on('close', async () => {
+        this.logger.warn('⚠️ Binance WebSocket disconnected');
+        await this.handleBinanceDisconnect();
+      });
+
+      // Heartbeat (ping/pong)
+      setInterval(() => {
+        if (this.binanceWs?.readyState === WebSocket.OPEN) {
+          this.binanceWs.ping();
+        }
+      }, 30000); // 30초마다
+
+    } catch (error) {
+      this.logger.error(`Failed to connect Binance: ${error.message}`);
+      await this.handleBinanceDisconnect();
+    }
+  }
+
+  // Fallback: Gate.io WebSocket
+  private async connectGateio() {
+    try {
+      this.gateioWs = new WebSocket('wss://api.gateio.ws/ws/v4/');
+
+      this.gateioWs.on('open', () => {
+        this.logger.log('✅ Gate.io WebSocket connected (fallback)');
+        this.activeProvider = 'gateio';
+        this.gateioRetries = 0;
+
+        // Subscribe to tickers
+        const subscribeMsg = {
+          time: Math.floor(Date.now() / 1000),
+          channel: 'spot.tickers',
+          event: 'subscribe',
+          payload: this.SYMBOLS.map(s => s.replace('USDT', '_USDT'))
+        };
+        this.gateioWs.send(JSON.stringify(subscribeMsg));
+      });
+
+      this.gateioWs.on('message', async (data: WebSocket.Data) => {
+        if (this.activeProvider !== 'gateio') return;
+
+        const parsed = JSON.parse(data.toString());
+        await this.handleGateioMessage(parsed);
+      });
+
+      this.gateioWs.on('error', (error) => {
+        this.logger.error(`Gate.io WebSocket error: ${error.message}`);
+      });
+
+      this.gateioWs.on('close', async () => {
+        this.logger.warn('⚠️ Gate.io WebSocket disconnected');
+        await this.handleGateioDisconnect();
+      });
+
+    } catch (error) {
+      this.logger.error(`Failed to connect Gate.io: ${error.message}`);
+      await this.handleGateioDisconnect();
+    }
+  }
+
+  // Binance 메시지 처리
+  private async handleBinanceMessage(message: any) {
+    const { data } = message;
+    if (!data?.s || !data?.c) return;
+
+    const symbol = data.s.replace('USDT', ''); // BTCUSDT → BTC
+    const price = parseFloat(data.c);
+    const priceChange24h = parseFloat(data.P); // 24h 변동률
+
+    await this.updatePrice(symbol, price, priceChange24h);
+  }
+
+  // Gate.io 메시지 처리
+  private async handleGateioMessage(message: any) {
+    if (message.event !== 'update' || message.channel !== 'spot.tickers') return;
+
+    const { result } = message;
+    if (!result?.currency_pair || !result?.last) return;
+
+    const symbol = result.currency_pair.replace('_USDT', ''); // BTC_USDT → BTC
+    const price = parseFloat(result.last);
+    const priceChange24h = parseFloat(result.change_percentage);
+
+    await this.updatePrice(symbol, price, priceChange24h);
+  }
+
+  // 가격 업데이트 및 알림 트리거
+  private async updatePrice(symbol: string, currentPrice: number, change24h: number) {
+    const cacheKey = `market:price:${symbol}`;
+    const previousPrice = await this.valkey.get(cacheKey);
+
+    // Valkey에 캐싱 (5분 TTL)
+    await this.valkey.setex(cacheKey, 300, currentPrice.toString());
+
+    // 실시간 가격 이벤트 발행 (SSE로 프론트엔드 전송)
+    this.emit('price_update', { symbol, price: currentPrice, change24h });
+
+    // 급격한 변동 감지
     if (previousPrice) {
-      const change = ((currentPrice - previousPrice) / previousPrice) * 100;
+      const prev = parseFloat(previousPrice);
+      const changePercent = ((currentPrice - prev) / prev) * 100;
 
-      if (isSuddenChange(symbol, change)) {
-        // Trigger notification job
-        await notificationQueue.add('market_alert', {
+      if (this.isSuddenChange(symbol, changePercent)) {
+        this.logger.warn(`🚨 ${symbol} sudden change: ${changePercent.toFixed(2)}%`);
+
+        await this.notificationQueue.add('market_alert', {
           type: 'market_alert',
-          data: { symbol, change, message: `${symbol} ${change > 0 ? 'surge' : 'drop'} ${Math.abs(change).toFixed(2)}%` }
+          data: {
+            symbol,
+            change: changePercent,
+            price: currentPrice,
+            message: `${symbol} ${changePercent > 0 ? '급등' : '급락'} ${Math.abs(changePercent).toFixed(2)}%`
+          }
         });
       }
     }
   }
+
+  // 급격한 변동 판단
+  private isSuddenChange(symbol: string, changePercent: number): boolean {
+    const thresholds = {
+      BTC: 5,
+      ETH: 7,
+      default: 10
+    };
+
+    const threshold = thresholds[symbol] || thresholds.default;
+    return Math.abs(changePercent) >= threshold;
+  }
+
+  // Binance 재연결 로직
+  private async handleBinanceDisconnect() {
+    this.binanceRetries++;
+
+    if (this.binanceRetries <= this.MAX_RETRIES) {
+      const delay = Math.pow(2, this.binanceRetries - 1) * 1000; // 1s, 2s, 4s
+      this.logger.log(`Retrying Binance in ${delay}ms (${this.binanceRetries}/${this.MAX_RETRIES})`);
+
+      await new Promise(resolve => setTimeout(resolve, delay));
+      await this.connectBinance();
+    } else {
+      this.logger.error(`❌ Binance failed after ${this.MAX_RETRIES} retries. Switching to Gate.io...`);
+      await this.connectGateio();
+    }
+  }
+
+  // Gate.io 재연결 로직
+  private async handleGateioDisconnect() {
+    this.gateioRetries++;
+
+    if (this.gateioRetries <= this.MAX_RETRIES) {
+      const delay = Math.pow(2, this.gateioRetries - 1) * 1000;
+      this.logger.log(`Retrying Gate.io in ${delay}ms (${this.gateioRetries}/${this.MAX_RETRIES})`);
+
+      await new Promise(resolve => setTimeout(resolve, delay));
+      await this.connectGateio();
+    } else {
+      this.logger.error(`❌ Gate.io failed after ${this.MAX_RETRIES} retries. Falling back to REST API...`);
+      this.activeProvider = 'rest';
+      // REST API fallback은 @Cron으로 별도 관리
+    }
+  }
+
+  // 모든 연결 종료
+  private disconnectAll() {
+    if (this.binanceWs) {
+      this.binanceWs.close();
+      this.binanceWs = null;
+    }
+    if (this.gateioWs) {
+      this.gateioWs.close();
+      this.gateioWs = null;
+    }
+  }
+
+  // 현재 활성 제공자 확인 (모니터링용)
+  getActiveProvider(): string {
+    return this.activeProvider;
+  }
+}
+```
+
+### 8.3 REST API Backup (WebSocket 모두 실패 시)
+
+```typescript
+// market/price-backup.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import axios from 'axios';
+
+@Injectable()
+export class PriceBackupService {
+  private readonly logger = new Logger(PriceBackupService.name);
+
+  constructor(
+    private readonly websocketService: WebSocketPriceService,
+    @Inject('VALKEY_CLIENT') private readonly valkey: Redis
+  ) {}
+
+  @Cron('*/5 * * * *')  // 5분마다
+  async backupPriceFetch() {
+    // WebSocket이 정상 작동 중이면 스킵
+    if (this.websocketService.getActiveProvider() !== 'rest') {
+      return;
+    }
+
+    this.logger.warn('⚠️ Using REST API backup for price data');
+
+    try {
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+        params: {
+          ids: 'bitcoin,ethereum,solana,binancecoin,dogecoin,ripple',
+          vs_currencies: 'usd',
+          include_24hr_change: true
+        }
+      });
+
+      const mapping = {
+        bitcoin: 'BTC',
+        ethereum: 'ETH',
+        solana: 'SOL',
+        binancecoin: 'BNB',
+        dogecoin: 'DOGE',
+        ripple: 'XRP'
+      };
+
+      for (const [coinId, symbol] of Object.entries(mapping)) {
+        const data = response.data[coinId];
+        if (!data) continue;
+
+        const price = data.usd;
+        const change24h = data.usd_24h_change;
+
+        // Valkey 캐싱
+        await this.valkey.setex(`market:price:${symbol}`, 300, price.toString());
+
+        this.logger.log(`REST backup: ${symbol} = $${price}`);
+      }
+    } catch (error) {
+      this.logger.error(`REST API backup failed: ${error.message}`);
+    }
+  }
+}
+```
+
+### 8.4 Health Check & Monitoring
+
+```typescript
+// market/market.controller.ts
+@Get('health/websocket')
+async getWebSocketHealth() {
+  return {
+    activeProvider: this.websocketService.getActiveProvider(),
+    timestamp: new Date().toISOString()
+  };
 }
 ```
 
@@ -960,7 +1301,11 @@ GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
 NEXTAUTH_SECRET="..."
 
-# External APIs
+# External APIs (WebSocket)
+BINANCE_WS_URL="wss://stream.binance.com:9443/ws"
+GATEIO_WS_URL="wss://api.gateio.ws/ws/v4/"
+
+# External APIs (REST - Backup)
 COINGECKO_API_KEY="..."
 DISCORD_WEBHOOK_URL="..."
 ```
