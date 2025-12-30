@@ -225,7 +225,7 @@ graph TD
 
 #### Backend Developer
 - **Primary**: Claude Code (아키텍처, 복잡한 로직, CRUD 생성)
-- **활용**: Prisma schema 생성, API 엔드포인트 구현, 멀티 에이전트 시스템
+- **활용**: Prisma schema 생성, API 엔드포인트 구현, 에이전트 파이프라인
 
 #### Frontend Developer
 - **Primary**: Claude Code (React 코드, 상태 관리)
@@ -239,7 +239,7 @@ graph TD
 #### AI Engineer
 - **Primary**: Claude Code (프롬프트 엔지니어링)
 - **Secondary**: Anthropic Workbench (프롬프트 테스트)
-- **활용**: 멀티 에이전트 오케스트레이션, Tool 설계, 환각 방지 메커니즘
+- **활용**: 에이전트 파이프라인 오케스트레이션, Tool 설계, 환각 방지 메커니즘
 
 ---
 
@@ -454,7 +454,7 @@ graph LR
 
 ## Case Studies
 
-### 사례 1: 멀티 에이전트 시스템 구현
+### 사례 1: 에이전트 파이프라인 구현
 
 ```typescript
 interface CaseStudy1 {

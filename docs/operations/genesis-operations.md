@@ -293,7 +293,7 @@ That's Wallet Buffett (월렛 버핏)
 
 [Robot] Powered by Claude Sonnet 4
 
-We built a multi-agent system that:
+We built an agent pipeline that:
 - Fetches real-time data (Binance/Gate.io WebSocket, Fear & Greed)
 - Cross-validates every number
 - Gives you insights, not just information
@@ -451,7 +451,7 @@ An AI mentor (Wallet Buffett) that gives you investment insights
 based on real-time market data + Warren Buffett's philosophy.
 
 **Key features:**
-- Zero hallucination (multi-agent validation)
+- Zero hallucination (agent pipeline validation)
 - Shadow Portfolios (track AI recommendations)
 - Proactive alerts (15-min market analysis)
 
@@ -867,7 +867,7 @@ interface MonthlyReview {
 ```
 
 **Tasks**:
-- [ ] Verify MAU 500+ achievement
+- [ ] Verify MAU 2,000+ achievement
 - [ ] Verify NPS 40+ achievement
 - [ ] Analyze Product-Market Fit signals
 - [ ] Plan Phase 2 roadmap

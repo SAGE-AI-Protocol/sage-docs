@@ -171,7 +171,7 @@ interface LaunchCampaign {
 - Response time monitoring (target: 2 seconds)
 - Discord community activation
 
-**Target**: MAU 500+, NPS 40+
+**Target**: MAU 2,000+, NPS 40+
 
 ---
 

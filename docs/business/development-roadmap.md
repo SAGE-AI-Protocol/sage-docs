@@ -189,7 +189,7 @@ interface MarketAlertConfig {
 - 전략: WhyBitcoinFallen.com + Product Hunt + Reddit
 - 목표: 첫 100명 가입, Discord 200+ members
 
-**마일스톤**: MVP 공식 런칭 + 첫 주 MAU 500+
+**마일스톤**: MVP 공식 런칭 + MAU 2,000+
 
 ### 2.5 점진적 출시의 장점
 
@@ -221,7 +221,7 @@ interface MarketAlertConfig {
 |------|------|----------|
 | 베타 테스터 | 10-20명 | 직접 모집 |
 | WhyBitcoinFallen 방문자 | 일 1,000+ | Google Analytics |
-| Sage.ai MAU | 500+ | 활성 사용자 수 |
+| Sage.ai MAU | 2,000+ | 활성 사용자 수 |
 | 환각률 | <1% | 사용자 신고 / 전체 응답 |
 | Shadow Portfolio 추적 | 10+ 트레이드 | DB 기록 |
 | NPS | 40+ | 베타 테스터 설문 |

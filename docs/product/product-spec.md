@@ -668,10 +668,10 @@ interface KeyMetrics {
 
 ### B. Related Documents
 
-- [MVP Definition](../business/mvp_definition.md) - MVP 범위 및 타임라인
-- [Backend Spec](../technical/backend_spec.md) - 기술 아키텍처
-- [Frontend Spec](../technical/frontend_spec.md) - UI/UX 구현
-- [Branding Guide](../business/branding_guide.md) - 브랜드 가이드
+- [MVP Definition](../business/mvp-definition.md) - MVP 범위 및 타임라인
+- [Backend Spec](../technical/backend-spec.md) - 기술 아키텍처
+- [Frontend Spec](../technical/frontend-spec.md) - UI/UX 구현
+- [Branding Guide](../business/branding-guide.md) - 브랜드 가이드
 
 ---
 

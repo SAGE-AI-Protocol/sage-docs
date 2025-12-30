@@ -25,7 +25,7 @@ interface MVPDefinition {
 |------|----------------|----------|
 | **베타 테스터** | 10-20명 | 직접 모집 |
 | **WhyBitcoinFallen 방문자** | 일 1,000+ | Google Analytics |
-| **Sage.ai MAU** | 500+ | 활성 사용자 수 |
+| **Sage.ai MAU** | 2,000+ | 활성 사용자 수 |
 | **환각률** | <1% | 사용자 신고 / 전체 응답 |
 | **Shadow Portfolio 추적** | 10+ 트레이드 | DB 기록 |
 | **NPS** | 40+ | 분기별 설문 |
