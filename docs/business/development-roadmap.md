@@ -238,21 +238,87 @@ interface MarketAlertConfig {
 
 ### 3.2 Q2 (4-6월): 글로벌 & 멀티 페르소나
 
-#### 멀티 페르소나 추가
+#### 멀티 페르소나 추가 (다양한 LLM 기반)
+
+> **용어 정의**
+> - **페르소나**: 대화 주체 = 캐릭터 + LLM 조합
+> - **에이전트 파이프라인**: 각 페르소나 내부의 처리 흐름 (Manager → Analyst → Persona → Risk)
 
 ```typescript
 interface PersonaConfig {
+  walletBuffett: {
+    name: "월렛 버핏 (Wallet Buffett)";
+    llm: "Claude";  // MVP부터 사용
+    philosophy: "가치 투자";
+    focus: ["장기 보유", "펀더멘털", "리스크 관리"];
+  };
   satoshiSage: {
     name: "사토시 현자 (Satoshi Sage)";
+    llm: "ChatGPT";  // Phase 2 추가
     philosophy: "비트코인 원리주의";
     focus: ["탈중앙화", "보안 중심", "장기 HODLing"];
   };
   alphaHunter: {
     name: "알파 헌터 (Alpha Hunter)";
+    llm: "Gemini";  // Phase 2 추가
     philosophy: "단기 트레이딩";
     focus: ["기술적 분석", "차트/지표", "고위험 고수익"];
   };
 }
+```
+
+**아키텍처 (Phase 2) - 멀티 페르소나**:
+```
+사용자 질문
+    ↓
+[페르소나 선택] ← 사용자가 선택 or 자동 라우팅
+    │
+    ├── 월렛 버핏 (Claude)
+    │   ├── Manager Agent ──→ 의도 분석
+    │   ├── Analyst Agent ──→ 시장 데이터 수집
+    │   ├── Persona Agent ──→ 버핏 철학 기반 해석
+    │   └── Risk Agent ──→ 교차 검증
+    │   └──→ 응답
+    │
+    ├── 사토시 현자 (ChatGPT)
+    │   ├── Manager Agent ──→ 의도 분석
+    │   ├── Analyst Agent ──→ 시장 데이터 수집
+    │   ├── Persona Agent ──→ 비트코인 원리주의 해석
+    │   └── Risk Agent ──→ 교차 검증
+    │   └──→ 응답
+    │
+    └── 알파 헌터 (Gemini)
+        ├── Manager Agent ──→ 의도 분석
+        ├── Analyst Agent ──→ 시장 데이터 수집
+        ├── Persona Agent ──→ 단기 트레이딩 해석
+        └── Risk Agent ──→ 교차 검증
+        └──→ 응답
+```
+
+**Agent Pipeline 상세 (각 페르소나 공통)**:
+```
+[사용자 질문]
+    ↓
+[Manager Agent] ← 각 LLM의 경량 모델 사용
+    ├─ 의도 파악 (market_query, advice, portfolio)
+    └─ 적절한 에이전트로 라우팅
+    ↓
+[Analyst Agent] ← 공통 (시장 데이터는 동일)
+    ├─ Binance/Gate.io WebSocket 실시간 가격
+    ├─ Alternative.me Fear & Greed
+    └─ 팩트 데이터 수집
+    ↓
+[Persona Agent] ← 각 LLM의 메인 모델 사용
+    ├─ 월렛 버핏: Claude Sonnet 4 (가치 투자)
+    ├─ 사토시 현자: GPT-4 (비트코인 원리주의)
+    └─ 알파 헌터: Gemini Pro (단기 트레이딩)
+    ↓
+[Risk Agent] ← 각 LLM의 경량 모델 사용
+    ├─ 수치 오류 검증
+    ├─ 편향 체크
+    └─ 최종 응답 승인
+    ↓
+[최종 응답] → SSE 스트리밍
 ```
 
 #### 멀티 언어 지원
@@ -269,12 +335,13 @@ interface PersonaConfig {
 └── [ ] 각 언어별 랜딩 페이지
 ```
 
-#### 그룹 채팅 (AI끼리 토론)
+#### 그룹 채팅 (멀티 페르소나 토론)
 
 ```
 그룹 채팅 기능
-├── [ ] 멀티 에이전트 토론 시스템
-├── [ ] 사용자 질문 → 3명의 AI가 토론
+├── [ ] 멀티 페르소나 토론 시스템
+│   └── 각 페르소나가 다른 LLM 사용 (Claude, GPT, Gemini)
+├── [ ] 사용자 질문 → 3명의 페르소나가 토론
 ├── [ ] 최종 합의 or 다수결
 └── [ ] 그룹 채팅 UI (3개 아바타)
 ```
@@ -419,7 +486,7 @@ DeFi 기능
 | 분기 | 리팩토링 주제 |
 |------|-------------|
 | 2026 Q2 | Database 인덱스 최적화, N+1 쿼리 제거 |
-| 2026 Q3 | 멀티 에이전트 성능 튜닝, Valkey 캐싱 전략 재검토 |
+| 2026 Q3 | 에이전트 파이프라인 성능 튜닝, Valkey 캐싱 전략 재검토 |
 | 2026 Q4 | TypeScript strict mode 전환, ESLint 규칙 강화 |
 | 2027 Q1 | Monorepo로 전환 (Nx / Turborepo) |
 
@@ -502,7 +569,7 @@ DeFi 기능
 |--------|----------|--------|
 | Claude API 장애 | 캐싱 강화, Rate limit 조정, Anthropic 지원팀 연락 | CTO |
 | 데이터베이스 과부하 | Read Replica, Valkey 캐싱 | DevOps |
-| 환각 증가 | 멀티 에이전트 재검증, Tool 강제 | AI Engineer |
+| 환각 증가 | 에이전트 파이프라인 재검증, Tool 강제 | AI Engineer |
 
 ### 11.2 비즈니스 리스크
 

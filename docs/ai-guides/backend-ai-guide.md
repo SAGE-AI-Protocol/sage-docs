@@ -142,7 +142,7 @@ graph TB
 
 **Prompt Template**:
 ```
-Implement the Analyst Agent for Sage.ai multi-agent system:
+Implement the Analyst Agent for Sage.ai Agent Pipeline:
 
 Agent Purpose: Fetch and analyze market data
 

@@ -320,7 +320,7 @@ interface IconSystem {
 interface MessagingHierarchy {
   main: "신뢰할 수 있는 AI 투자 멘토, 월렛 버핏";
   sub: {
-    hallucination: "멀티 에이전트 교차 검증으로 환각 제로";
+    hallucination: "에이전트 파이프라인 교차 검증으로 환각 제로";
     performance: "섀도우 포트폴리오로 투명하게 공개";
     proactive: "AI가 먼저 알려드립니다";
   };

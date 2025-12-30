@@ -9,10 +9,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repository (`sage-docs`) contains all technical specifications, business documentation, and AI development guides for the platform.
 
 **Key Differentiators**:
-- **Wallet Buffett AI Mentor**: Claude Sonnet 4-based multi-agent system
+- **Wallet Buffett AI Mentor**: Claude Sonnet 4-based Agent Pipeline
 - **Shadow Portfolio**: Transparent performance tracking (Target: Benchmark +3%p, Hit Rate 72.3%)
-- **Proactive Analysis**: 15-min automatic market analysis with PWA Push + Discord notifications
+- **Proactive Analysis**: Real-time WebSocket monitoring with PWA Push + Discord notifications
 - **Conversational Onboarding**: No surveys - profile inferred from natural conversation
+
+## Terminology
+
+| 용어 | 정의 | 예시 |
+|------|------|------|
+| **페르소나 (Persona)** | 대화 주체. 캐릭터 + LLM 조합 | 월렛 버핏(Claude), 사토시 현자(GPT), 알파 헌터(Gemini) |
+| **에이전트 (Agent)** | 페르소나 내부의 기능 단위 | Manager, Analyst, Persona, Risk |
+| **에이전트 파이프라인 (Agent Pipeline)** | 단일 페르소나 내에서 에이전트들이 순차 처리하는 흐름 | Manager → Analyst → Persona → Risk |
+| **멀티 페르소나** | 여러 LLM 기반 캐릭터들이 협업 (Phase 2+) | 월렛 버핏 + 사토시 현자 + 알파 헌터 토론 |
+
+**MVP**: 월렛 버핏(Claude) 페르소나 1개만 사용
+**Phase 2+**: 다른 LLM 기반 페르소나 추가 (ChatGPT, Gemini 등)
 
 ## Repository Structure
 
@@ -32,11 +44,12 @@ The project follows an **AI-Native development approach** with **Clean Architect
 - **Framework**: Nest.js 10.x (TypeScript native, modular structure)
 - **ORM**: Prisma 5.x (type-safe, intuitive migrations)
 - **Architecture Pattern**: Layered + Domain (Clean Lite)
-- **AI System**: Multi-agent orchestration with Claude Sonnet 4/Haiku 4
+- **AI System**: Agent Pipeline (월렛 버핏 페르소나)
   - **Manager Agent**: Haiku 4 - Routes user intent
   - **Analyst Agent**: Haiku 4 - Fetches facts (price, news, sentiment)
   - **Persona Agent**: Sonnet 4 - Warren Buffett philosophy interpretation
   - **Risk Agent**: Haiku 4 - Cross-validation, hallucination prevention
+  - *Phase 2+: 다른 LLM 기반 페르소나 추가 (GPT, Gemini)*
 - **Context Management**: Simple 20-message window (no RAG for MVP)
 - **Auth**: Auth.js (@auth/core) with Google OAuth
 - **Streaming**: Nest.js built-in SSE (Server-Sent Events)

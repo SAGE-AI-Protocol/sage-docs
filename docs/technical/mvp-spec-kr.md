@@ -323,10 +323,11 @@ MVP 기술 스택
 │   ├── Auth.js (@auth/core)
 │   └── BullMQ 5.x (비동기 작업)
 │
-├── AI
-│   ├── Claude Sonnet 4 (메인 대화, Persona Agent)
-│   ├── Claude Haiku 4 (라우팅, 팩트체크, 알림 요약)
+├── AI (월렛 버핏 페르소나 - Agent Pipeline)
+│   ├── Claude Sonnet 4 (Persona Agent - 메인 대화)
+│   ├── Claude Haiku 4 (Manager/Analyst/Risk Agent)
 │   └── @anthropic-ai/sdk (스트리밍)
+│   # Phase 2+: 다른 LLM 기반 페르소나 추가 (GPT, Gemini 등)
 │
 ├── Database
 │   ├── PostgreSQL 18 (RDS)

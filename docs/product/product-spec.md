@@ -60,9 +60,12 @@ interface ChatFeature {
 | **실시간 스트리밍** | 2초 이내 첫 토큰 응답 | Nest.js SSE |
 | **시장 데이터 통합** | 실시간 가격, Fear & Greed | Binance/Gate.io WebSocket, Alternative.me |
 | **투자 철학 기반 해석** | 워렌 버핏 스타일 통찰 | Claude Sonnet 4 Persona |
-| **환각 방지** | 수치는 Tool에서만 | Multi-agent cross-validation |
+| **환각 방지** | 수치는 Tool에서만 | Agent Pipeline 교차 검증 |
 
-#### Multi-Agent Architecture
+#### Agent Pipeline (월렛 버핏 페르소나)
+
+> **용어**: "에이전트 파이프라인"은 단일 페르소나 내에서 역할별 처리 단계입니다.
+> MVP는 월렛 버핏(Claude) 1개 페르소나, Phase 2+에서 다른 LLM 기반 페르소나 추가 예정.
 
 ```
 [사용자 질문]

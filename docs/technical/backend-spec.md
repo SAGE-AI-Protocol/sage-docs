@@ -144,7 +144,7 @@ sequenceDiagram
     Frontend->>User: Redirect to /chat
 ```
 
-#### 2.2.2 Chat Message Flow (Multi-Agent)
+#### 2.2.2 Chat Message Flow (Agent Pipeline)
 
 ```mermaid
 sequenceDiagram
@@ -503,9 +503,17 @@ interface NotificationEndpoints {
 
 ---
 
-## 5. Multi-Agent System
+## 5. Agent Pipeline (페르소나 내부 구조)
 
-### 5.1 Agent Architecture Flow
+> **용어 정의**
+> - **페르소나 (Persona)**: 대화 주체. 캐릭터 + LLM 조합 (예: 월렛 버핏 = Claude, 사토시 현자 = GPT)
+> - **에이전트 (Agent)**: 페르소나 내부의 기능 단위 (Manager, Analyst, Persona, Risk)
+> - **에이전트 파이프라인**: 단일 페르소나 내에서 에이전트들이 순차적으로 처리하는 흐름
+>
+> MVP에서는 **월렛 버핏 (Claude)** 페르소나 1개만 사용합니다.
+> Phase 2+에서 다른 LLM 기반 페르소나 (ChatGPT, Gemini 등)가 추가됩니다.
+
+### 5.1 Agent Pipeline Flow
 
 ```mermaid
 graph TD
