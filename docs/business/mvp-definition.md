@@ -54,7 +54,7 @@ interface ChatFeature {
     included: [
       "6개 코인 (BTC, ETH, SOL, BNB, DOGE, XRP)",
       "Fear & Greed Index 통합",
-      "실시간 시장 데이터 통합 (CoinGecko)"
+      "실시간 시장 데이터 통합 (Binance/Gate.io WebSocket)"
     ];
     excluded: [
       "다중 페르소나 (사토시 현자, 알파 헌터 등) → Phase 2",
@@ -92,7 +92,7 @@ interface ShadowPortfolioFeature {
 
 ```typescript
 interface ProactiveAnalysisFeature {
-  description: "15분마다 시장 자동 분석 및 컨텍스트 생성";
+  description: "실시간 시장 모니터링 및 급변 시 자동 분석";
   components: {
     polling: "@nestjs/schedule 주기적 폴링";
     background: "BullMQ 기반 백그라운드 작업";

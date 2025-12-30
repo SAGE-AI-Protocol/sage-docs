@@ -21,7 +21,8 @@ graph TD
     E --> G[ElastiCache Valkey 8.x]
     E --> H[External APIs]
     H --> I[Anthropic Claude]
-    H --> J[CoinGecko]
+    H --> J[Binance WebSocket]
+    H --> J2[Gate.io WebSocket]
     H --> K[Alternative.me]
 ```
 
@@ -1006,10 +1007,15 @@ interface APIKeyStore {
     rotation: "Manual (Phase 2: Automatic)";
     access: "ECS Task Role only";
   };
-  coingecko: {
-    storage: "AWS Secrets Manager";
-    rotation: "Manual";
-    rateLimit: "50 calls/minute";
+  binance: {
+    storage: "None (Public WebSocket)";
+    type: "WebSocket";
+    endpoint: "wss://stream.binance.com:9443/ws";
+  };
+  gateio: {
+    storage: "None (Public WebSocket)";
+    type: "WebSocket";
+    endpoint: "wss://api.gateio.ws/ws/v4/";
   };
   discord: {
     storage: "AWS Secrets Manager";

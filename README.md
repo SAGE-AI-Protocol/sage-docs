@@ -27,7 +27,7 @@
    - 신뢰 구축의 핵심 기능
 
 3. **능동적 분석**
-   - 15분마다 시장 자동 분석 및 컨텍스트 생성
+   - 실시간 시장 모니터링 및 급변 시 즉시 분석
    - 급변 시 PWA Push + Discord 알림
    - 딥링크로 즉시 관련 채팅 시작
 
@@ -91,7 +91,7 @@
 | **상태 관리** | Zustand 4.x (클라이언트) + TanStack Query 5.x (서버) |
 | **Infrastructure** | ECS Fargate + S3/CloudFront |
 | **비동기 작업** | BullMQ 5.x + Valkey (Memory 추출, 알림 발송) |
-| **스케줄링** | @nestjs/schedule (15분 가격 폴링) |
+| **실시간 가격** | Binance/Gate.io WebSocket (Fallback 이중화) |
 | **모니터링** | Sentry + CloudWatch + OpenTelemetry |
 
 ### AI 에이전트 시스템
@@ -131,14 +131,14 @@
 
 - Claude API 연동 + Nest.js SSE 스트리밍
 - 월렛 버핏 페르소나 구현
-- 시장 데이터 연동 (CoinGecko, Alternative.me)
+- 시장 데이터 연동 (Binance/Gate.io WebSocket, Alternative.me)
 - 유저 프로필 자동 추론
 - 섀도우 포트폴리오 시스템
 
 ### Month 3: 능동적 분석 & 마무리
 
 - BullMQ 기반 Memory 추출/압축
-- @nestjs/schedule 15분 자동 시장 분석
+- WebSocket 실시간 가격 모니터링 및 급변 감지
 - PWA Push + Discord 알림
 - 딥링크 시스템 (/chat/new?context=xxx)
 - QA + ECS Fargate 배포
@@ -176,7 +176,7 @@
 ### 성능 목표
 
 - 채팅 응답 속도: 2초 이내 (스트리밍 시작)
-- 능동적 분석: 15분 간격 자동 시장 분석
+- 능동적 분석: 실시간 WebSocket 가격 모니터링
 - 컨텍스트 로드: 20개 메시지 (0.5초 이내)
 
 ### 확장성 설계
@@ -193,7 +193,7 @@
 |-----------|------|--------|
 | **Persona Moat** | 월렛 버핏 캐릭터 IP | 복제 불가능 |
 | **Trust Moat** | 환각 제로 + 쉐도우 포트폴리오 | 신뢰 확보 |
-| **Engagement Moat** | 능동적 분석 시스템 (15분 자동 컨텍스트 생성) | 재방문율 증가 |
+| **Engagement Moat** | 능동적 분석 시스템 (실시간 급변 감지 및 즉시 알림) | 재방문율 증가 |
 | **Data Moat** | 쉐도우 포트폴리오 누적 데이터 | 시간에 따라 강화 |
 
 ---

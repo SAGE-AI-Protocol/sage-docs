@@ -189,8 +189,11 @@ Documentation references these external systems:
 - **AWS Infrastructure**: ECS Fargate, RDS PostgreSQL 18, ElastiCache Valkey 8.x, Lambda, S3/CloudFront
 
 ### Market Data
-- **CoinGecko API**: Price data for 6 cryptocurrencies (BTC, ETH, SOL, BNB, DOGE, XRP)
-  - Rate limit: 50 calls/minute
+- **Binance WebSocket** (Primary): Real-time price data for 6 cryptocurrencies (BTC, ETH, SOL, BNB, DOGE, XRP)
+  - Rate limit: Unlimited
+  - Caching: Valkey 5-minute TTL
+- **Gate.io WebSocket** (Fallback): Auto-switch when Binance disconnects
+  - Rate limit: Unlimited
   - Caching: Valkey 5-minute TTL
 - **Alternative.me**: Fear & Greed Index
   - Rate limit: Unlimited

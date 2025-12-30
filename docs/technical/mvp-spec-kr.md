@@ -339,7 +339,8 @@ MVP 기술 스택
 │   └── @nestjs/schedule (15분 Cron)
 │
 └── External APIs
-    ├── CoinGecko (가격)
+    ├── Binance WebSocket (실시간 가격 - Primary)
+    ├── Gate.io WebSocket (실시간 가격 - Fallback)
     └── Alternative.me (Fear and Greed)
 ```
 
@@ -381,11 +382,11 @@ MVP Architecture
 │   │                                                 │
 │   └──────────────────────────────────────────────────┤
 │                                                      │
-│   ┌──────────────┬──────────────┬──────────────┬─────┴────┐
-│   │              │              │              │          │
-│   v              v              v              v          v
-│ [PostgreSQL]  [Valkey]    [Claude API]   [CoinGecko]   [Alternative.me]
-│   (RDS)     (ElastiCache)  (Sonnet 4)                  (Fear&Greed)
+│   ┌──────────────┬──────────────┬──────────────┬─────────┬─────────────┐
+│   │              │              │              │         │             │
+│   v              v              v              v         v             v
+│ [PostgreSQL]  [Valkey]    [Claude API]   [Binance WS] [Gate.io WS] [Alternative.me]
+│   (RDS)     (ElastiCache)  (Sonnet 4)    (실시간가격) (Fallback)   (Fear&Greed)
 │                            (Haiku 4)
 │
 └── Background Processing
@@ -1007,7 +1008,7 @@ Week 2: 인증 + 바이럴/랜딩 사이트
 │
 ├── Day 3 (수): WhyBitcoinFallen.com (Vite + React)
 │   ├── Vite + React + TypeScript 프로젝트 생성
-│   ├── 실시간 BTC 가격 컴포넌트 (TanStack Query -> CoinGecko)
+│   ├── 실시간 BTC 가격 컴포넌트 (SSE → 백엔드 WebSocket 데이터)
 │   ├── Fear & Greed 게이지 컴포넌트 (-> Alternative.me)
 │   ├── 간단 차트 (Recharts)
 │   ├── AI 미리보기 컴포넌트 (UI만, API는 Week 3 후 연동)
@@ -1083,9 +1084,10 @@ Week 4: 채팅 고도화 + 시장 데이터
 │   └── 채팅 제목 자동 생성
 │
 ├── Day 2 (화): 시장 데이터 연동
-│   ├── CoinGecko API (가격 6종)
+│   ├── Binance WebSocket 연결 (실시간 가격 6종)
+│   ├── Gate.io WebSocket Fallback 구현
 │   ├── Valkey 5분 캐싱
-│   └── 프롬프트에 가격 주입
+│   └── 프롬프트에 실시간 가격 주입
 │
 ├── Day 3 (수): 유저 프로필 추론
 │   ├── 응답에서 inferredProfile 추출
@@ -1306,7 +1308,7 @@ WhyBitcoinFallen.com 구조
 └── S3 + CloudFront 배포
 
 API 연동:
-├── CoinGecko: 실시간 가격
+├── Sage.ai Backend SSE: 실시간 가격 (Binance/Gate.io WebSocket 데이터)
 ├── Alternative.me: Fear & Greed
 └── Sage.ai API: AI 한마디 (캐시된 응답, 5분 갱신)
 ```
@@ -1455,19 +1457,18 @@ export function useBTCPrice() {
   return useQuery<PriceData>({
     queryKey: ['btc-price'],
     queryFn: async () => {
-      const res = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'
-      );
+      // Sage.ai Backend에서 실시간 WebSocket 가격 데이터 가져오기
+      const res = await fetch('https://api.sage.ai/market/price/BTC');
       const data = await res.json();
       return {
-        price: data.bitcoin.usd,
-        change24h: data.bitcoin.usd_24h_change,
-        high24h: data.bitcoin.usd_24h_high,
-        low24h: data.bitcoin.usd_24h_low,
+        price: data.price,
+        change24h: data.change24h,
+        high24h: data.high24h,
+        low24h: data.low24h,
       };
     },
-    refetchInterval: 30_000, // 30초마다 갱신
-    staleTime: 10_000,
+    refetchInterval: 5_000, // 5초마다 갱신 (실시간 WebSocket 데이터)
+    staleTime: 2_000,
   });
 }
 ```

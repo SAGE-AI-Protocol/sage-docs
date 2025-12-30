@@ -23,7 +23,7 @@ interface ValueProposition {
   differentiators: [
     "환각 제로 - 검증된 데이터만 제공",
     "투명한 성과 - 섀도우 포트폴리오로 추적 가능",
-    "능동적 케어 - 15분마다 시장 분석 및 알림"
+    "능동적 케어 - 실시간 시장 모니터링 및 즉시 알림"
   ];
 }
 ```
@@ -58,7 +58,7 @@ interface ChatFeature {
 | 기능 | 설명 | 기술 구현 |
 |------|------|----------|
 | **실시간 스트리밍** | 2초 이내 첫 토큰 응답 | Nest.js SSE |
-| **시장 데이터 통합** | 실시간 가격, Fear & Greed | CoinGecko, Alternative.me |
+| **시장 데이터 통합** | 실시간 가격, Fear & Greed | Binance/Gate.io WebSocket, Alternative.me |
 | **투자 철학 기반 해석** | 워렌 버핏 스타일 통찰 | Claude Sonnet 4 Persona |
 | **환각 방지** | 수치는 Tool에서만 | Multi-agent cross-validation |
 
@@ -72,7 +72,7 @@ interface ChatFeature {
     └─ 적절한 에이전트로 라우팅
     ↓
 [Analyst Agent] - Haiku 4
-    ├─ CoinGecko API 호출 (가격, 변동률)
+    ├─ WebSocket 실시간 가격 수신 (Binance/Gate.io)
     ├─ Alternative.me API 호출 (Fear & Greed)
     └─ 팩트 데이터 수집
     ↓
@@ -208,7 +208,7 @@ Scenario: 수익률 확인
 interface ProactiveAnalysisFeature {
   id: "F003";
   name: "능동적 분석";
-  description: "15분마다 시장 자동 분석 및 컨텍스트 생성";
+  description: "실시간 시장 모니터링 및 급변 시 자동 분석";
   priority: "P0 - Must Have";
 }
 ```
@@ -217,16 +217,16 @@ interface ProactiveAnalysisFeature {
 
 ```mermaid
 graph TD
-    A[@nestjs/schedule 15분 폴링] --> B[시장 데이터 조회]
-    B --> C{급변 감지?}
-    C -->|Yes| D[BullMQ 작업 생성]
-    D --> E[AI 분석 컨텍스트 생성]
-    E --> F[알림 발송]
-    F --> G[PWA Push]
-    F --> H[Discord Webhook]
-    G --> I[딥링크로 채팅 시작]
-    H --> I
-    C -->|No| A
+    A[WebSocket 실시간 가격 수신] --> B{급변 감지?}
+    B -->|Yes BTC±5%, ETH±7%| C[BullMQ 작업 생성]
+    C --> D[AI 분석 컨텍스트 생성]
+    D --> E[알림 발송]
+    E --> F[PWA Push]
+    E --> G[Discord Webhook]
+    F --> H[딥링크로 채팅 시작]
+    G --> H
+    B -->|No| I[Valkey 캐싱]
+    I --> A
 ```
 
 #### Alert Triggers
@@ -286,10 +286,10 @@ Scenario: 딥링크로 채팅 시작
 
 | 포함 | 제외 (Phase 2+) |
 |------|-----------------|
-| 가격 급변 감지 | 온체인 분석 (고래 이동) |
+| 가격 급변 감지 (실시간 WebSocket) | 온체인 분석 (고래 이동) |
 | Fear & Greed 급변 | 뉴스 기반 알림 |
 | PWA Push + Discord | SMS, 이메일 |
-| 15분 폴링 | 실시간 WebSocket |
+| Binance/Gate.io 이중화 | 추가 거래소 연동 |
 
 ---
 

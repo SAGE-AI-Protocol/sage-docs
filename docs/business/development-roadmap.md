@@ -106,7 +106,7 @@ interface Release1Features {
   };
   dataIntegration: {
     coins: ["BTC", "ETH", "SOL", "BNB", "DOGE", "XRP"];
-    apis: ["CoinGecko", "Alternative.me Fear & Greed"];
+    apis: ["Binance/Gate.io WebSocket", "Alternative.me Fear & Greed"];
     caching: "Valkey 5분";
   };
 }

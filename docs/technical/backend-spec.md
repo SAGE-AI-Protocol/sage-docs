@@ -81,10 +81,6 @@ interface ExternalServices {
       type: "WebSocket";
       streams: "ticker (실시간 가격)";
     };
-    backup: {
-      provider: "CoinGecko";
-      type: "REST API (WebSocket 이중화 실패 시)";
-    };
   };
   fearGreed: {
     provider: "Alternative.me";
@@ -100,8 +96,7 @@ interface ExternalServices {
 **선택 근거**:
 - **실시간성**: WebSocket으로 가격 변동 즉시 감지 (15분 폴링 → 실시간)
 - **이중화**: Binance 장애 시 Gate.io로 자동 전환 (무중단)
-- **3단 fallback**: Binance → Gate.io → CoinGecko REST
-- **비용 절감**: WebSocket은 무료, REST API는 rate limit 있음
+- **비용 절감**: WebSocket은 무료, 별도 API 구독 불필요
 
 ---
 
@@ -189,19 +184,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant Cron
+    participant WebSocket
     participant MarketService
-    participant CoinGecko
     participant Valkey
     participant NotificationQueue
     participant BullMQ
     participant Discord
     participant PWA
 
-    Cron->>MarketService: Trigger every 15 minutes
+    Note over WebSocket: Binance/Gate.io 실시간 연결
+    WebSocket->>MarketService: Price update (실시간)
     MarketService->>Valkey: Get previous prices
-    MarketService->>CoinGecko: Fetch current prices (6 coins)
-    CoinGecko-->>MarketService: {BTC: 43250, ETH: 2100, ...}
     MarketService->>Valkey: Cache new prices (TTL: 5min)
 
     alt Sudden change detected (>5% for BTC)
@@ -765,8 +758,8 @@ async function processNotification(job: Job<NotificationJob>) {
 **선택 근거**:
 - **실시간성**: 가격 변동 즉시 감지 및 알림 (기존 15분 폴링 → <1초 실시간)
 - **이중화**: Binance 장애 시 Gate.io로 자동 전환 (무중단 운영)
-- **비용 효율성**: WebSocket은 무료, REST API는 rate limit 제약
-- **정확성**: 거래소 실제 체결가 사용 (CoinGecko 집계 가격보다 정확)
+- **비용 효율성**: WebSocket은 무료, 별도 API 구독 불필요
+- **정확성**: 거래소 실제 체결가 사용
 
 ```typescript
 interface WebSocketConfig {
@@ -788,12 +781,6 @@ interface WebSocketConfig {
       backoff: "exponential";
     };
   };
-  backup: {
-    provider: "CoinGecko";
-    type: "REST";
-    endpoint: "https://api.coingecko.com/api/v3/simple/price";
-    schedule: "*/5 * * * *";  // 5분마다 (WebSocket 모두 실패 시)
-  };
 }
 ```
 
@@ -812,7 +799,7 @@ export class WebSocketPriceService extends EventEmitter implements OnModuleInit,
   private binanceWs: WebSocket | null = null;
   private gateioWs: WebSocket | null = null;
 
-  private activeProvider: 'binance' | 'gateio' | 'rest' = 'binance';
+  private activeProvider: 'binance' | 'gateio' = 'binance';
   private binanceRetries = 0;
   private gateioRetries = 0;
 
@@ -1022,9 +1009,11 @@ export class WebSocketPriceService extends EventEmitter implements OnModuleInit,
       await new Promise(resolve => setTimeout(resolve, delay));
       await this.connectGateio();
     } else {
-      this.logger.error(`❌ Gate.io failed after ${this.MAX_RETRIES} retries. Falling back to REST API...`);
-      this.activeProvider = 'rest';
-      // REST API fallback은 @Cron으로 별도 관리
+      this.logger.error(`❌ Gate.io failed after ${this.MAX_RETRIES} retries.`);
+      // Binance 재시도 (무한 루프 방지를 위해 딜레이 후)
+      await new Promise(resolve => setTimeout(resolve, 30000)); // 30초 대기
+      this.binanceRetries = 0;
+      await this.connectBinance();
     }
   }
 
@@ -1047,70 +1036,7 @@ export class WebSocketPriceService extends EventEmitter implements OnModuleInit,
 }
 ```
 
-### 8.3 REST API Backup (WebSocket 모두 실패 시)
-
-```typescript
-// market/price-backup.service.ts
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
-import axios from 'axios';
-
-@Injectable()
-export class PriceBackupService {
-  private readonly logger = new Logger(PriceBackupService.name);
-
-  constructor(
-    private readonly websocketService: WebSocketPriceService,
-    @Inject('VALKEY_CLIENT') private readonly valkey: Redis
-  ) {}
-
-  @Cron('*/5 * * * *')  // 5분마다
-  async backupPriceFetch() {
-    // WebSocket이 정상 작동 중이면 스킵
-    if (this.websocketService.getActiveProvider() !== 'rest') {
-      return;
-    }
-
-    this.logger.warn('⚠️ Using REST API backup for price data');
-
-    try {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
-        params: {
-          ids: 'bitcoin,ethereum,solana,binancecoin,dogecoin,ripple',
-          vs_currencies: 'usd',
-          include_24hr_change: true
-        }
-      });
-
-      const mapping = {
-        bitcoin: 'BTC',
-        ethereum: 'ETH',
-        solana: 'SOL',
-        binancecoin: 'BNB',
-        dogecoin: 'DOGE',
-        ripple: 'XRP'
-      };
-
-      for (const [coinId, symbol] of Object.entries(mapping)) {
-        const data = response.data[coinId];
-        if (!data) continue;
-
-        const price = data.usd;
-        const change24h = data.usd_24h_change;
-
-        // Valkey 캐싱
-        await this.valkey.setex(`market:price:${symbol}`, 300, price.toString());
-
-        this.logger.log(`REST backup: ${symbol} = $${price}`);
-      }
-    } catch (error) {
-      this.logger.error(`REST API backup failed: ${error.message}`);
-    }
-  }
-}
-```
-
-### 8.4 Health Check & Monitoring
+### 8.3 Health Check & Monitoring
 
 ```typescript
 // market/market.controller.ts
