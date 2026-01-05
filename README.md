@@ -15,15 +15,15 @@ Sage.ai is organized across **4 independent repositories**:
 - **Repository**: [https://github.com/5010-dev/sage-docs](https://github.com/5010-dev/sage-docs)
 - **Role**: Single Source of Truth for all specs and architecture docs
 
-### 2. **sage-frontend**
+### 2. **sage-front**
 - **Purpose**: React web application
-- **Repository**: [https://github.com/5010-dev/sage-frontend](https://github.com/5010-dev/sage-frontend) *(to be created)*
+- **Repository**: [https://github.com/5010-dev/sage-front](https://github.com/5010-dev/sage-front)
 - **Tech Stack**: React 18.3, Vite 5, TypeScript, Zustand, TanStack Query
 - **Deployment**: AWS Amplify (automatic on push to `main`)
 
-### 3. **sage-backend**
+### 3. **sage-back**
 - **Purpose**: Nest.js API server
-- **Repository**: [https://github.com/5010-dev/sage-backend](https://github.com/5010-dev/sage-backend) *(to be created)*
+- **Repository**: [https://github.com/5010-dev/sage-back](https://github.com/5010-dev/sage-back) *(to be created)*
 - **Tech Stack**: Nest.js 10.x, Prisma 5.x, PostgreSQL 18, Valkey 8.x
 - **Deployment**: AWS ECS Fargate via GitHub Actions
 
@@ -154,10 +154,10 @@ Code repositories contain **local copies** of relevant specs:
 
 ```bash
 # Frontend repo
-sage-frontend/docs/frontend-spec.md  # Copied from specs/frontend-spec.md
+sage-front/docs/frontend-spec.md  # Copied from specs/frontend-spec.md
 
 # Backend repo
-sage-backend/docs/backend-spec.md    # Copied from specs/backend-spec.md
+sage-back/docs/backend-spec.md    # Copied from specs/backend-spec.md
 
 # Infrastructure repo
 sage-infra/docs/infrastructure-spec.md  # Copied from specs/infrastructure-spec.md
@@ -176,7 +176,7 @@ git commit specs/frontend-spec.md -m "Update SSE reconnection logic"
 git push
 
 # Sync to frontend repo
-cd ../sage-frontend
+cd ../sage-front
 cp ../sage-docs/specs/frontend-spec.md docs/
 git commit docs/frontend-spec.md -m "Sync frontend-spec from sage-docs@abc123"
 git push
@@ -227,13 +227,13 @@ Use these terms **correctly** in all documentation and code:
 - Set up AWS Amplify app via Pulumi
 
 ### Phase 3: Backend Implementation
-- Create sage-backend repository
+- Create sage-back repository
 - Implement Agent Pipeline
 - Set up SSE streaming endpoints
 - Connect to Claude API
 
 ### Phase 4: Frontend Implementation
-- Create sage-frontend repository
+- Create sage-front repository
 - Implement SSE client
 - Build chat interface
 - Deploy to Amplify
@@ -252,8 +252,8 @@ Use these terms **correctly** in all documentation and code:
 ### For Code Changes
 
 Go to the relevant code repository:
-- Frontend changes → [sage-frontend](https://github.com/5010-dev/sage-frontend)
-- Backend changes → [sage-backend](https://github.com/5010-dev/sage-backend)
+- Frontend changes → [sage-front](https://github.com/5010-dev/sage-front)
+- Backend changes → [sage-back](https://github.com/5010-dev/sage-back)
 - Infrastructure changes → [sage-infra](https://github.com/5010-dev/sage-infra)
 
 ---

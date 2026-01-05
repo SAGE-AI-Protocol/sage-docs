@@ -19,9 +19,9 @@ Sage.ai는 4개의 독립 레포지토리로 구성됩니다:
   - Architecture documentation
   - GitHub Wiki synchronization
 
-### 2. sage-frontend (Frontend Application)
+### 2. sage-front (Frontend Application)
 - **Purpose**: React-based web application
-- **Repository**: `https://github.com/5010-dev/sage-frontend`
+- **Repository**: `https://github.com/5010-dev/sage-front`
 - **Tech Stack**: React 18.3, Vite 5, TypeScript, Zustand, TanStack Query
 - **Deployment**: AWS Amplify
 - **Key Features**:
@@ -29,9 +29,9 @@ Sage.ai는 4개의 독립 레포지토리로 구성됩니다:
   - Shadow portfolio management
   - Market data visualization
 
-### 3. sage-backend (Backend API)
+### 3. sage-back (Backend API)
 - **Purpose**: Nest.js-based API server
-- **Repository**: `https://github.com/5010-dev/sage-backend`
+- **Repository**: `https://github.com/5010-dev/sage-back`
 - **Tech Stack**: Nest.js 10.x, Prisma 5.x, PostgreSQL 18, Valkey 8.x
 - **Deployment**: ECS Fargate
 - **Key Features**:
@@ -271,8 +271,8 @@ Price Change Detection
 ## Repository Links
 
 - **Documentation**: [sage-docs](https://github.com/5010-dev/sage-docs)
-- **Frontend**: [sage-frontend](https://github.com/5010-dev/sage-frontend) (to be created)
-- **Backend**: [sage-backend](https://github.com/5010-dev/sage-backend) (to be created)
+- **Frontend**: [sage-front](https://github.com/5010-dev/sage-front) (to be created)
+- **Backend**: [sage-back](https://github.com/5010-dev/sage-back) (to be created)
 - **Infrastructure**: [sage-infra](https://github.com/5010-dev/sage-infra) (to be created)
 
 ---

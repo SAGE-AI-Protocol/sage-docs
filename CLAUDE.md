@@ -20,14 +20,14 @@ Sage.ai is organized across 4 independent repositories:
 - **Repository**: `https://github.com/5010-dev/sage-docs`
 - **Role**: Single Source of Truth
 
-### 2. sage-frontend
+### 2. sage-front
 - **Purpose**: React web application
-- **Repository**: `https://github.com/5010-dev/sage-frontend`
+- **Repository**: `https://github.com/5010-dev/sage-front`
 - **Deployment**: AWS Amplify
 
-### 3. sage-backend
+### 3. sage-back
 - **Purpose**: Nest.js API server
-- **Repository**: `https://github.com/5010-dev/sage-backend`
+- **Repository**: `https://github.com/5010-dev/sage-back`
 - **Deployment**: AWS ECS Fargate
 
 ### 4. sage-infra
@@ -78,8 +78,8 @@ sage-docs/
 ## Documentation Synchronization
 
 Code repositories contain **local copies** of relevant specs for quick reference:
-- `sage-frontend/docs/frontend-spec.md` (copied from `specs/frontend-spec.md`)
-- `sage-backend/docs/backend-spec.md` (copied from `specs/backend-spec.md`)
+- `sage-front/docs/frontend-spec.md` (copied from `specs/frontend-spec.md`)
+- `sage-back/docs/backend-spec.md` (copied from `specs/backend-spec.md`)
 - `sage-infra/docs/infrastructure-spec.md` (copied from `specs/infrastructure-spec.md`)
 
 **When updating specs**:
@@ -138,7 +138,7 @@ Code repositories contain **local copies** of relevant specs for quick reference
 
 ## Commands (in Code Repositories)
 
-### Frontend (sage-frontend)
+### Frontend (sage-front)
 ```bash
 pnpm install          # Install dependencies
 pnpm dev              # Run dev server
@@ -148,7 +148,7 @@ pnpm lint             # Lint code
 pnpm test             # Run tests
 ```
 
-### Backend (sage-backend)
+### Backend (sage-back)
 ```bash
 pnpm install          # Install dependencies
 pnpm dev              # Run dev server
