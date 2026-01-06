@@ -1244,7 +1244,134 @@ COINGECKO_API_KEY="..."
 DISCORD_WEBHOOK_URL="..."
 ```
 
-## Appendix B: Development Commands
+## Appendix B: Docker Development Environment (Recommended)
+
+### Why Docker?
+
+Docker를 사용하면 다음과 같은 이점이 있습니다:
+- **환경 격리**: 로컬 시스템을 깨끗하게 유지
+- **팀 협업**: 모든 개발자가 동일한 환경 사용
+- **빠른 설정**: 새 팀원 온보딩 시 `docker compose up` 한 번으로 완료
+- **프로덕션 유사성**: 실제 배포 환경과 유사한 컨테이너 기반 개발
+- **여러 서비스 관리**: PostgreSQL + Valkey를 한 번에 실행
+
+### docker-compose.yml
+
+```yaml
+version: '3.8'
+
+services:
+  # PostgreSQL 18 Database
+  postgres:
+    image: postgres:18-alpine
+    container_name: sage-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: sage
+      POSTGRES_PASSWORD: sage123
+      POSTGRES_DB: sage
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sage"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Valkey 8.x (Redis-compatible cache)
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: sage-valkey
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  valkey_data:
+```
+
+### Quick Start
+
+```bash
+# 1. Docker 서비스 시작
+docker compose up -d
+
+# 2. 상태 확인
+docker compose ps
+
+# 3. 로그 확인
+docker compose logs -f postgres
+docker compose logs -f valkey
+
+# 4. .env 파일 설정
+DATABASE_URL=postgresql://sage:sage123@localhost:5432/sage
+VALKEY_URL=valkey://localhost:6379
+
+# 5. Prisma 마이그레이션 실행
+pnpm prisma:generate
+pnpm prisma:migrate
+
+# 6. 개발 서버 시작
+pnpm dev
+```
+
+### Docker 명령어
+
+```bash
+# 서비스 시작
+docker compose up -d              # 백그라운드에서 시작
+docker compose up                 # 포그라운드에서 시작 (로그 실시간 확인)
+
+# 서비스 중지
+docker compose stop               # 중지 (데이터 유지)
+docker compose down               # 중지 및 컨테이너 삭제 (데이터는 유지)
+docker compose down -v            # 중지 및 볼륨까지 삭제 (데이터 완전 삭제)
+
+# 상태 확인
+docker compose ps                 # 서비스 상태
+docker compose logs postgres      # PostgreSQL 로그
+docker compose logs -f valkey     # Valkey 로그 (실시간)
+
+# 데이터베이스 초기화 (개발 중 필요 시)
+docker compose down -v            # 기존 데이터 삭제
+docker compose up -d postgres     # PostgreSQL만 재시작
+pnpm prisma:migrate               # 마이그레이션 재실행
+```
+
+### Troubleshooting
+
+**포트 충돌 시**:
+```bash
+# 기존 PostgreSQL 중지
+brew services stop postgresql@18
+
+# 또는 docker-compose.yml에서 포트 변경
+ports:
+  - "5433:5432"  # 로컬 5433 포트 사용
+```
+
+**데이터 초기화**:
+```bash
+# 모든 데이터 삭제 후 재시작
+docker compose down -v
+docker compose up -d
+pnpm prisma:generate
+pnpm prisma:migrate
+```
+
+---
+
+## Appendix C: Development Commands
 
 ```bash
 # Development server
