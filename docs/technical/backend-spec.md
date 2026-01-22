@@ -1,7 +1,7 @@
 # Sage.ai Backend Specification
 
-> Document Version: 3.0
-> Last Modified: 2025-12-26
+> Document Version: 3.1
+> Last Modified: 2026-01-07
 > Author: Sam
 > Target Audience: Backend Developers
 
@@ -30,8 +30,8 @@ interface CoreStack {
   };
   orm: {
     name: "Prisma";
-    version: "5.x";
-    reason: "타입 안정성, 직관적 마이그레이션";
+    version: "5.19.1";
+    reason: "타입 안정성, 직관적 마이그레이션. v7은 설정 파일 분리로 호환성 문제 발생";
   };
   database: {
     name: "PostgreSQL";
@@ -40,7 +40,7 @@ interface CoreStack {
   };
   cache: {
     name: "Valkey";
-    version: "8.x";
+    version: "8.1.5";
     reason: "100% Redis 호환, Linux Foundation 오픈소스 (라이센스 안정성), 커뮤니티 주도 개발";
   };
 }

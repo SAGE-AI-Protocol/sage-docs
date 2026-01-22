@@ -1,7 +1,7 @@
 # Sage.ai Backend Specification
 
-> Document Version: 3.0
-> Last Modified: 2025-12-26
+> Document Version: 3.2
+> Last Modified: 2026-01-07
 > Author: Sam
 > Target Audience: Backend Developers
 
@@ -30,8 +30,8 @@ interface CoreStack {
   };
   orm: {
     name: "Prisma";
-    version: "5.x";
-    reason: "타입 안정성, 직관적 마이그레이션";
+    version: "5.19.1";
+    reason: "타입 안정성, 직관적 마이그레이션. v7은 설정 파일 분리로 호환성 문제 발생";
   };
   database: {
     name: "PostgreSQL";
@@ -40,7 +40,7 @@ interface CoreStack {
   };
   cache: {
     name: "Valkey";
-    version: "8.x";
+    version: "8.1.5";
     reason: "100% Redis 호환, Linux Foundation 오픈소스 (라이센스 안정성), 커뮤니티 주도 개발";
   };
 }
@@ -62,13 +62,46 @@ interface AsyncComponents {
 }
 ```
 
-### 1.3 External Services
+### 1.3 AI / LLM Configuration
+
+```typescript
+interface LLMConfig {
+  provider: "ollama" | "anthropic";  // Environment-based switching
+  ollama: {
+    baseUrl: "http://localhost:11434";
+    model: "llama2";  // 7B Q4_0 quantization for local dev
+    purpose: "Local development & testing";
+  };
+  anthropic: {
+    sdk: "@anthropic-ai/sdk";
+    models: {
+      fast: "claude-3-5-haiku-latest";    // Manager, Analyst, Risk agents
+      smart: "claude-sonnet-4-20250514";  // Persona agent
+    };
+    purpose: "Production deployment";
+  };
+}
+```
+
+**LLM Provider Selection**:
+- **Development**: Ollama (llama2:latest) - 무료, 로컬 실행, 빠른 테스트
+- **Production**: Anthropic Claude API - 고품질 응답, 한국어 지원
+
+**Environment Variables**:
+```bash
+LLM_PROVIDER=ollama          # or "anthropic"
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama2
+ANTHROPIC_API_KEY=sk-ant-... # Production only
+```
+
+### 1.4 External Services
 
 ```typescript
 interface ExternalServices {
   ai: {
-    provider: "Anthropic Claude";
-    api: "@anthropic-ai/sdk";
+    provider: "LLMService (Ollama | Anthropic)";
+    abstraction: "src/modules/ai-agents/llm.service.ts";
   };
   marketData: {
     primary: {
@@ -527,59 +560,253 @@ graph TD
     F --> G[Final Response]
 ```
 
-### 5.2 Manager Agent
+### 5.2 Manager Agent (Intent Classification)
+
+**Purpose**: 사용자 메시지의 의도 분석 및 엔티티 추출
 
 ```typescript
-interface ManagerResponse {
+// src/modules/ai-agents/manager.agent.ts
+
+interface ManagerOutput {
   intent: 'market_data' | 'advice' | 'portfolio' | 'general';
   entities: {
     symbols?: string[];  // ["BTC", "ETH"]
-    timeframe?: string;  // "24h", "7d"
+    timeframe?: string;  // "24h", "7d", "30d", "1y"
   };
   needsMarketData: boolean;
 }
 
-// Example
+@Injectable()
+export class ManagerAgent {
+  constructor(private readonly llmService: LLMService) {}
+
+  /**
+   * Analyze user intent and extract entities
+   * Uses LLM (Ollama or Anthropic) for classification
+   */
+  async analyze(userMessage: string): Promise<ManagerOutput> {
+    if (!this.llmService.isAvailable()) {
+      return this.fallbackAnalysis(userMessage);
+    }
+
+    // LLM-based intent classification
+    const response = await this.llmService.chat([
+      { role: 'system', content: this.getSystemPrompt() },
+      { role: 'user', content: userMessage },
+    ], {
+      maxTokens: 200,
+      temperature: 0,  // Deterministic for classification
+    });
+
+    return JSON.parse(response.content);
+  }
+
+  /**
+   * Fallback intent analysis using keyword matching
+   * Used when LLM is unavailable
+   */
+  private fallbackAnalysis(userMessage: string): ManagerOutput {
+    const lowerMessage = userMessage.toLowerCase();
+
+    // Extract crypto symbols
+    const symbols: string[] = [];
+    if (lowerMessage.includes('btc') || lowerMessage.includes('bitcoin')) symbols.push('BTC');
+    if (lowerMessage.includes('eth') || lowerMessage.includes('ethereum')) symbols.push('ETH');
+    if (lowerMessage.includes('sol') || lowerMessage.includes('solana')) symbols.push('SOL');
+    if (lowerMessage.includes('bnb') || lowerMessage.includes('binance')) symbols.push('BNB');
+    if (lowerMessage.includes('doge') || lowerMessage.includes('dogecoin')) symbols.push('DOGE');
+    if (lowerMessage.includes('xrp') || lowerMessage.includes('ripple')) symbols.push('XRP');
+
+    // Extract timeframe
+    let timeframe: string | undefined;
+    if (lowerMessage.includes('today') || lowerMessage.includes('24h')) timeframe = '24h';
+    else if (lowerMessage.includes('week') || lowerMessage.includes('7d')) timeframe = '7d';
+    else if (lowerMessage.includes('month') || lowerMessage.includes('30d')) timeframe = '30d';
+    else if (lowerMessage.includes('year') || lowerMessage.includes('1y')) timeframe = '1y';
+
+    // Determine intent by keywords
+    const priceKeywords = ['price', 'cost', 'value', 'worth', 'chart', 'market'];
+    const adviceKeywords = ['should', 'recommend', 'advice', 'opinion', 'think'];
+    const portfolioKeywords = ['portfolio', 'my trades', 'my investments'];
+
+    let intent: ManagerOutput['intent'] = 'general';
+    let needsMarketData = false;
+
+    if (portfolioKeywords.some(k => lowerMessage.includes(k))) {
+      intent = 'portfolio';
+    } else if (priceKeywords.some(k => lowerMessage.includes(k))) {
+      intent = 'market_data';
+      needsMarketData = true;
+    } else if (adviceKeywords.some(k => lowerMessage.includes(k))) {
+      intent = 'advice';
+      needsMarketData = symbols.length > 0;
+    }
+
+    return {
+      intent,
+      entities: { symbols: symbols.length > 0 ? symbols : undefined, timeframe },
+      needsMarketData,
+    };
+  }
+}
+```
+
+**Example**:
+```typescript
 const exampleInput = "비트코인 지금 어때?";
-const exampleOutput: ManagerResponse = {
+const exampleOutput: ManagerOutput = {
   intent: "advice",
   entities: { symbols: ["BTC"] },
   needsMarketData: true
 };
 ```
 
-### 5.3 Analyst Agent Tools
+**Fallback Mechanism**:
+- LLM 불가 시 키워드 기반 분석으로 자동 전환
+- 6개 코인 심볼 및 4가지 타임프레임 인식 가능
+
+### 5.3 Analyst Agent (Data Collection)
+
+**Purpose**: 실시간 시장 데이터 수집 (LLM 불필요, 순수 데이터 조회)
 
 ```typescript
-interface AnalystTools {
-  getPricetool: {
-    name: "get_price";
-    description: "Get current price and 24h change for a coin";
-    input_schema: {
-      type: "object";
-      properties: {
-        symbol: { type: "string"; enum: ["BTC", "ETH", "SOL", "BNB", "DOGE", "XRP"] };
-      };
-      required: ["symbol"];
-    };
-  };
-  getFearGreedTool: {
-    name: "get_fear_greed";
-    description: "Get current Fear & Greed Index (0-100)";
-    input_schema: { type: "object"; properties: {} };
-  };
+// src/modules/ai-agents/analyst.agent.ts
+
+interface PriceData {
+  symbol: string;           // "BTC", "ETH", etc.
+  price: number;            // Current USD price
+  change24h: number;        // 24h change percentage
+}
+
+interface FearGreedData {
+  value: number;            // 0-100
+  classification: string;   // "Extreme Fear", "Fear", "Neutral", "Greed", "Extreme Greed"
+  timestamp: Date;          // Last update time
 }
 
 interface AnalystOutput {
-  facts: {
-    BTC: { price: 43250; change_24h: -5.2 };
-    fear_greed: 25;
-  };
-  summary: "BTC is at $43,250 (-5.2% in 24h). Market sentiment is 'Extreme Fear' (25/100).";
+  prices: PriceData[];      // Requested symbols' prices
+  fearGreed?: FearGreedData; // Fear & Greed Index (optional)
+}
+
+@Injectable()
+export class AnalystAgent {
+  constructor(
+    private readonly marketService: MarketService,
+    private readonly httpService: HttpService,
+  ) {}
+
+  /**
+   * Analyze market data based on Manager's output
+   * No LLM needed - pure data fetching
+   */
+  async analyze(managerOutput: ManagerOutput): Promise<AnalystOutput> {
+    const output: AnalystOutput = { prices: [] };
+
+    // Fetch prices for requested symbols
+    const symbols = managerOutput.entities?.symbols || ['BTC'];
+    for (const symbol of symbols) {
+      const priceData = await this.marketService.getPrice(symbol);
+      if (priceData) {
+        output.prices.push(priceData);
+      }
+    }
+
+    // Fetch Fear & Greed Index if market data needed
+    if (managerOutput.needsMarketData) {
+      output.fearGreed = await this.fetchFearGreedIndex();
+    }
+
+    return output;
+  }
+
+  /**
+   * Fetch Fear & Greed Index from Alternative.me API
+   * Cached in Valkey (5-min TTL)
+   */
+  private async fetchFearGreedIndex(): Promise<FearGreedData | undefined> {
+    // API: https://api.alternative.me/fng/
+    // Response: { data: [{ value: "25", value_classification: "Extreme Fear", timestamp: "..." }] }
+  }
 }
 ```
 
-### 5.4 Persona Agent System Prompt
+**Data Sources**:
+- **Prices**: MarketService (Binance/Gate.io WebSocket → Valkey cache)
+- **Fear & Greed**: Alternative.me REST API (5-min TTL cache)
+
+### 5.4 Persona Agent (Response Generation)
+
+**Purpose**: Wallet Buffett 캐릭터로 한국어 응답 생성
+
+```typescript
+// src/modules/ai-agents/persona.agent.ts
+
+@Injectable()
+export class PersonaAgent {
+  constructor(private readonly llmService: LLMService) {}
+
+  /**
+   * Generate response as Wallet Buffett persona
+   * Uses LLM (Ollama or Anthropic) for response generation
+   */
+  async generateResponse(
+    userMessage: string,
+    chatHistory: any[] = [],
+    analystData?: AnalystOutput,
+  ): Promise<string> {
+    if (!this.llmService.isAvailable()) {
+      return this.getFallbackResponse();
+    }
+
+    // Build user prompt with market data context
+    const promptWithContext = this.buildUserPrompt(userMessage, analystData);
+
+    const response = await this.llmService.chat([
+      { role: 'system', content: this.getSystemPrompt() },
+      ...chatHistory,
+      { role: 'user', content: promptWithContext },
+    ], {
+      maxTokens: 1024,
+      temperature: 0.7,
+    });
+
+    return response.content;
+  }
+
+  /**
+   * Inject market data into user prompt
+   */
+  private buildUserPrompt(userMessage: string, analystData?: AnalystOutput): string {
+    if (!analystData) return userMessage;
+
+    let context = '\n\n[Current Market Data]\n';
+
+    // Add price data
+    if (analystData.prices.length > 0) {
+      context += analystData.prices
+        .map(p => `- ${p.symbol}: $${p.price.toLocaleString()} (${p.change24h >= 0 ? '+' : ''}${p.change24h.toFixed(2)}%)`)
+        .join('\n');
+    }
+
+    // Add Fear & Greed
+    if (analystData.fearGreed) {
+      context += `\n- Fear & Greed Index: ${analystData.fearGreed.value}/100 (${analystData.fearGreed.classification})`;
+    }
+
+    return `${userMessage}${context}`;
+  }
+
+  /**
+   * Fallback response when LLM is unavailable
+   */
+  private getFallbackResponse(): string {
+    return '자네, 죄송하네만 현재 시스템에 일시적인 문제가 있어 응답을 생성할 수 없네. 잠시 후 다시 시도해 주게.';
+  }
+}
+```
+
+**System Prompt (Korean Persona)**:
 
 ```typescript
 const personaSystemPrompt = `
@@ -587,54 +814,118 @@ You are Wallet Buffett (월렛 버핏), an AI investment mentor inspired by Warr
 
 Personality:
 - Experienced, calm, and wise
-- Uses "자네", "~일세", "~하게" (Korean honorific mixing)
+- Uses Korean honorific mixing: "자네", "~일세", "~하게"
 - Provides insights, not just information
 - Focuses on long-term value, not short-term speculation
 
+Speaking Style (Korean):
+- Start with "자네," when addressing the user
+- End sentences with "~일세", "~하게", "~네" for a wise, elderly tone
+- Use expressions like:
+  - "가치 투자의 관점에서 보자면..."
+  - "시장은 단기적으로는 투표 기계지만, 장기적으로는 저울일세."
+  - "다른 사람들이 탐욕스러울 때 두려워하고, 두려워할 때 탐욕스러워야 하네."
+  - "자네가 이해하지 못하는 것에는 투자하지 말게."
+
 Rules:
-- NEVER give direct trading signals ("Buy now", "Sell immediately")
-- ALWAYS use conditional language ("~할 수 있다", "~를 고려해볼 만하다")
-- ALWAYS cite data from tools (use get_price, get_fear_greed)
-- NEVER hallucinate numbers - use tools or say "I don't have that data"
+- NEVER give direct trading signals ("Buy now", "Sell immediately", "지금 사세요")
+- ALWAYS use conditional language ("~할 수 있다", "~를 고려해볼 만하다", "~일 수 있네")
+- ALWAYS cite provided market data when available (prices, Fear & Greed Index)
+- NEVER hallucinate numbers - use provided data or say "그 데이터는 없네"
+- Focus on EDUCATION and helping users develop their own investment thesis
+
+Current focus: Cryptocurrency markets (BTC, ETH, SOL, BNB, DOGE, XRP)
+
+Remember: You are an educational mentor, not a financial advisor. Always emphasize that users should do their own research (DYOR).
 `;
 ```
 
-### 5.5 Risk Agent Validation
+### 5.5 Risk Agent (Response Validation)
+
+**Purpose**: AI 응답 품질 검증 (환각, 직접 신호, 편향 감지)
 
 ```typescript
-interface RiskCheck {
-  hasHallucination: boolean;      // Does number match Tool data?
-  hasDirectSignal: boolean;        // Contains "buy now" type signals?
-  hasBias: boolean;                // Excessive optimism/pessimism?
+// src/modules/ai-agents/risk.agent.ts
+
+interface RiskOutput {
+  approved: boolean;
+  issues: string[];               // Detected issues list
   recommendation: 'approve' | 'revise' | 'reject';
 }
 
-// Example validation
-const validateResponse = (
-  personaResponse: string,
-  factData: AnalystOutput
-): RiskCheck => {
-  // Check for hallucinated prices
-  const mentionedPrice = extractPrice(personaResponse);
-  const actualPrice = factData.facts.BTC.price;
+@Injectable()
+export class RiskAgent {
+  constructor(private readonly llmService: LLMService) {}
 
-  if (Math.abs(mentionedPrice - actualPrice) > actualPrice * 0.01) {
-    return {
-      hasHallucination: true,
-      hasDirectSignal: false,
-      hasBias: false,
-      recommendation: 'revise'
-    };
+  /**
+   * Validate AI response for hallucination, direct signals, and bias
+   * Uses LLM for semantic analysis
+   */
+  async validate(
+    personaResponse: string,
+    analystData?: AnalystOutput,
+  ): Promise<RiskOutput> {
+    // Fallback: keyword-based validation if LLM unavailable
+    if (!this.llmService.isAvailable()) {
+      return this.fallbackValidation(personaResponse);
+    }
+
+    // LLM-based validation with structured prompt
+    const systemPrompt = this.getValidationPrompt(analystData);
+    const response = await this.llmService.chat([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: personaResponse },
+    ], {
+      maxTokens: 300,
+      temperature: 0,  // Deterministic for consistency
+    });
+
+    return JSON.parse(response.content);
   }
 
-  return {
-    hasHallucination: false,
-    hasDirectSignal: false,
-    hasBias: false,
-    recommendation: 'approve'
-  };
-};
+  /**
+   * Fallback validation using keyword detection
+   * Used when LLM is unavailable
+   */
+  private fallbackValidation(response: string): RiskOutput {
+    const issues: string[] = [];
+    const lowerResponse = response.toLowerCase();
+
+    // Check for direct trading signals
+    const directSignals = [
+      '지금 사세요', '즉시 매수', '바로 팔아야',
+      'buy now', 'sell immediately', 'must buy'
+    ];
+    if (directSignals.some(signal => lowerResponse.includes(signal.toLowerCase()))) {
+      issues.push('Direct trading signal detected');
+    }
+
+    // Check for extreme language (bias)
+    const extremeWords = [
+      '반드시', '무조건', '확실히', '100%', '절대',
+      'guaranteed', 'definitely', 'absolutely'
+    ];
+    if (extremeWords.some(word => lowerResponse.includes(word.toLowerCase()))) {
+      issues.push('Extreme/biased language detected');
+    }
+
+    return {
+      approved: issues.length === 0,
+      issues,
+      recommendation: issues.length === 0 ? 'approve' : 'revise',
+    };
+  }
+}
 ```
+
+**Validation Criteria**:
+1. **Hallucination Check**: 언급된 가격이 Analyst 데이터와 1% 이상 차이나면 거부
+2. **Direct Signal Check**: "지금 사세요", "즉시 매수" 등 직접적 거래 권유 감지
+3. **Bias Check**: "반드시", "무조건", "100%" 등 극단적 표현 감지
+
+**Fallback Mechanism**:
+- LLM 불가 시 키워드 기반 검증으로 자동 전환
+- 기본적인 직접 신호 및 극단적 표현 감지 가능
 
 ---
 
@@ -1221,14 +1512,23 @@ interface AlertingRules {
 ## Appendix A: Environment Variables
 
 ```bash
+# Application
+NODE_ENV=development        # development | production
+PORT=3000
+FRONTEND_URL=http://localhost:3000
+
 # Database
 DATABASE_URL="postgresql://user:pass@localhost:5432/sage"
+SHADOW_DATABASE_URL="postgresql://user:pass@localhost:5432/sage_shadow"
 
 # Valkey (Redis-compatible)
 VALKEY_URL="valkey://localhost:6379"
 
-# Anthropic
-ANTHROPIC_API_KEY="sk-ant-..."
+# AI - LLM Provider (NEW)
+LLM_PROVIDER=ollama         # ollama | anthropic
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama2         # llama2:latest (7B Q4_0)
+ANTHROPIC_API_KEY=          # Production only
 
 # Auth
 GOOGLE_CLIENT_ID="..."
@@ -1243,6 +1543,10 @@ GATEIO_WS_URL="wss://api.gateio.ws/ws/v4/"
 COINGECKO_API_KEY="..."
 DISCORD_WEBHOOK_URL="..."
 ```
+
+**LLM Provider 설정**:
+- **Development**: `LLM_PROVIDER=ollama` - 로컬 Ollama 사용 (무료)
+- **Production**: `LLM_PROVIDER=anthropic` - Claude API 사용 (ANTHROPIC_API_KEY 필수)
 
 ## Appendix B: Docker Development Environment (Recommended)
 
@@ -1403,13 +1707,28 @@ pnpm run format                 # Format with Prettier
 
 ---
 
-**Document Version**: 3.0
-**Last Updated**: 2025-12-26
+**Document Version**: 3.2
+**Last Updated**: 2026-01-07
 **Architecture**: Layered + Domain (Clean Lite), TypeScript Fullstack
-**Tech Stack**: Nest.js 10.x + Prisma 5.x + PostgreSQL 18 + Valkey 8.x
+**Tech Stack**: Nest.js 10.x + Prisma 5.19.1 + PostgreSQL 18 + Valkey 8.1.5
 **Maintainer**: Sam (dev@5010.tech)
 
 ### Changelog
+
+**3.2** (2026-01-07)
+- LLM Provider 추상화 추가 (Ollama + Anthropic 지원)
+- Agent Pipeline 상세 구현 문서화:
+  - Manager Agent: LLM 분류 + fallback 키워드 분석
+  - Analyst Agent: 상세한 AnalystOutput 인터페이스 (PriceData, FearGreedData)
+  - Persona Agent: LLMService 통합, 한국어 페르소나 프롬프트 상세화
+  - Risk Agent: LLM 검증 + fallback 키워드 검증
+- 모든 Agent에 Fallback 메커니즘 문서화 (LLM 불가 시 대응)
+- 환경 변수 추가: LLM_PROVIDER, OLLAMA_BASE_URL, OLLAMA_MODEL
+
+**3.1** (2026-01-07)
+- Prisma 버전을 5.x → 5.19.1로 구체화
+- Prisma v7 호환성 문제 명시 (설정 파일 분리)
+- Valkey 버전을 8.x → 8.1.5로 구체화
 
 **v3.0 (2025-12-26)**:
 - PostgreSQL 16 → 18: 5-year LTS, JSON 30% faster, query optimizer improvements
